@@ -7,7 +7,7 @@ use Doctrine\DBAL\Schema\Schema;
 
 /**
  * Class Version20151005132540
- * This migration adds a column ui_locale_id for the oro_user table. Because the column will not be null,
+ * This migration adds a column ui_locale_id for the pim_user table. Because the column will not be null,
  * the default value is generated in this order:
  * - if PIM config has a full locale (fr_FR, en_US), set it,
  * - if PIM config has locale (fr, en), we check if a full locale is available (fr_FR, en_US), and set it,
@@ -33,9 +33,9 @@ class Version20151005132540 extends AbstractMigration
 
         $default_locale = $this->getDefaultCatalogLocaleId();
 
-        $this->addSql('ALTER TABLE oro_user ADD ui_locale_id INT NOT NULL DEFAULT ' . $default_locale);
-        $this->addSql('ALTER TABLE oro_user ADD CONSTRAINT FK_F82840BCF925933B FOREIGN KEY (ui_locale_id) REFERENCES pim_catalog_locale (id)');
-        $this->addSql('CREATE INDEX IDX_F82840BCF925933B ON oro_user (ui_locale_id)');
+        $this->addSql('ALTER TABLE pim_user ADD ui_locale_id INT NOT NULL DEFAULT ' . $default_locale);
+        $this->addSql('ALTER TABLE pim_user ADD CONSTRAINT FK_F82840BCF925933B FOREIGN KEY (ui_locale_id) REFERENCES pim_catalog_locale (id)');
+        $this->addSql('CREATE INDEX IDX_F82840BCF925933B ON pim_user (ui_locale_id)');
     }
 
     /**

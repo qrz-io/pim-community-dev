@@ -6,14 +6,14 @@ use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Oro\Bundle\UserBundle\Entity\Group;
-use Oro\Bundle\UserBundle\Entity\Role;
-use Oro\Bundle\UserBundle\Entity\UserApi;
 use Pim\Bundle\CatalogBundle\Entity\Channel;
 use Pim\Bundle\CatalogBundle\Entity\Locale;
 use Pim\Bundle\CatalogBundle\Model\CategoryInterface;
 use Pim\Bundle\CatalogBundle\Model\ChannelInterface;
 use Pim\Bundle\CatalogBundle\Model\LocaleInterface;
+use Pim\Bundle\UserBundle\Entity\Group;
+use Pim\Bundle\UserBundle\Entity\Role;
+use Pim\Bundle\UserBundle\Entity\UserApi;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
@@ -664,7 +664,7 @@ class User implements UserInterface
             $roleName = $role;
         } else {
             throw new \InvalidArgumentException(
-                '$role must be an instance of Oro\Bundle\UserBundle\Entity\Role or a string'
+                '$role must be an instance of Pim\Bundle\UserBundle\Entity\Role or a string'
             );
         }
 
@@ -694,7 +694,7 @@ class User implements UserInterface
             $roleObject = $this->getRole($role);
         } else {
             throw new \InvalidArgumentException(
-                '$role must be an instance of Oro\Bundle\UserBundle\Entity\Role or a string'
+                '$role must be an instance of Pim\Bundle\UserBundle\Entity\Role or a string'
             );
         }
         if ($roleObject) {

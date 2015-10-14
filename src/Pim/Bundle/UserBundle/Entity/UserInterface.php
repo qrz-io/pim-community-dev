@@ -6,13 +6,13 @@ use DateTime;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Oro\Bundle\LocaleBundle\Model\FullNameInterface;
-use Oro\Bundle\UserBundle\Entity\EntityUploadedImageInterface;
-use Oro\Bundle\UserBundle\Entity\Group;
-use Oro\Bundle\UserBundle\Entity\Role;
-use Oro\Bundle\UserBundle\Entity\UserApi;
 use Pim\Bundle\CatalogBundle\Model\CategoryInterface;
 use Pim\Bundle\CatalogBundle\Model\ChannelInterface;
 use Pim\Bundle\CatalogBundle\Model\LocaleInterface;
+use Pim\Bundle\UserBundle\Entity\EntityUploadedImageInterface;
+use Pim\Bundle\UserBundle\Entity\Group;
+use Pim\Bundle\UserBundle\Entity\Role;
+use Pim\Bundle\UserBundle\Entity\UserApi;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Security\Core\User\AdvancedUserInterface;
 

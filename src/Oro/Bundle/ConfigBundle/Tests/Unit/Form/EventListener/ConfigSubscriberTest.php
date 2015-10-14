@@ -40,21 +40,21 @@ class ConfigSubscriberTest extends \PHPUnit_Framework_TestCase
     public function testPreSubmit()
     {
         $data = array(
-            'oro_user___level' => array(
+            'pim_user___level' => array(
                 'use_parent_scope_value' => true,
             ),
         );
 
         $this->configManager->expects($this->once())
             ->method('get')
-            ->with('oro_user.level', true)
+            ->with('pim_user.level', true)
             ->will($this->returnValue(20));
 
         $this->event->expects($this->once())
             ->method('getData')
             ->will($this->returnValue($data));
 
-        $data['oro_user___level']['value'] = 20;
+        $data['pim_user___level']['value'] = 20;
         $this->event->expects($this->once())
             ->method('setData')
             ->with($data);
