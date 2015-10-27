@@ -49,6 +49,8 @@ services:
         arguments:
             - '@pim_serializer'
             - '@pim_serializer'
+            - '@security.token_storage'
+            - '@pim_localization.configuration.locale'
 
     pim_enrich.form.subscriber.add_variant_group_template:
         class: %pim_enrich.form.subscriber.add_variant_group_template.class%

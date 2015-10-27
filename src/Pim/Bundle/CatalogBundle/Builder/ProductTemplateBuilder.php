@@ -5,6 +5,7 @@ namespace Pim\Bundle\CatalogBundle\Builder;
 use Pim\Bundle\CatalogBundle\Model\AttributeInterface;
 use Pim\Bundle\CatalogBundle\Model\ProductTemplateInterface;
 use Pim\Bundle\CatalogBundle\Model\ProductValueInterface;
+use Pim\Bundle\CatalogBundle\Resolver\UserLocaleResolver;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
@@ -26,6 +27,9 @@ class ProductTemplateBuilder implements ProductTemplateBuilderInterface
     /** @var ProductBuilder */
     protected $productBuilder;
 
+    /** @var UserLocaleResolver */
+    protected $userLocaleResolver;
+
     /** @var string */
     protected $productTemplateClass;
 
@@ -36,6 +40,7 @@ class ProductTemplateBuilder implements ProductTemplateBuilderInterface
      * @param NormalizerInterface   $normalizer
      * @param DenormalizerInterface $denormalizer
      * @param ProductBuilder        $productBuilder
+     * @param UserLocaleResolver    $userLocaleResolver
      * @param string                $productTemplateClass
      * @param string                $productClass
      */
@@ -43,12 +48,14 @@ class ProductTemplateBuilder implements ProductTemplateBuilderInterface
         NormalizerInterface $normalizer,
         DenormalizerInterface $denormalizer,
         ProductBuilder $productBuilder,
+        UserLocaleResolver $userLocaleResolver,
         $productTemplateClass,
         $productClass
     ) {
         $this->normalizer           = $normalizer;
         $this->denormalizer         = $denormalizer;
         $this->productBuilder       = $productBuilder;
+        $this->userLocaleResolver   = $userLocaleResolver;
         $this->productTemplateClass = $productTemplateClass;
         $this->productClass         = $productClass;
     }
@@ -66,8 +73,9 @@ class ProductTemplateBuilder implements ProductTemplateBuilderInterface
      */
     public function addAttributes(ProductTemplateInterface $template, array $attributes)
     {
+        $options    = array_merge($this->userLocaleResolver->getOptions(), ['entity' => 'product']);
         $values     = $this->buildProductValuesFromTemplateValuesData($template, $attributes);
-        $valuesData = $this->normalizer->normalize($values, 'json', ['entity' => 'product']);
+        $valuesData = $this->normalizer->normalize($values, 'json', $options);
         $template->setValuesData($valuesData);
     }
 
@@ -93,7 +101,8 @@ class ProductTemplateBuilder implements ProductTemplateBuilderInterface
      */
     protected function buildProductValuesFromTemplateValuesData(ProductTemplateInterface $template, array $attributes)
     {
-        $values  = $this->denormalizer->denormalize($template->getValuesData(), 'ProductValue[]', 'json');
+        $options = $this->userLocaleResolver->getOptions();
+        $values  = $this->denormalizer->denormalize($template->getValuesData(), 'ProductValue[]', 'json', $options);
         $product = new $this->productClass();
 
         foreach ($values as $value) {

@@ -3,9 +3,12 @@
 namespace Pim\Bundle\EnrichBundle\Form\Subscriber;
 
 use Pim\Bundle\CatalogBundle\Model\ProductTemplateInterface;
+use Pim\Component\Localization\LocaleConfigurationInterface;
+use Pim\Component\Localization\Localizer\AbstractNumberLocalizer;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
@@ -24,14 +27,28 @@ class TransformProductTemplateValuesSubscriber implements EventSubscriberInterfa
     /** @var DenormalizerInterface */
     protected $denormalizer;
 
+    /** @var TokenStorageInterface */
+    protected $tokenStorage;
+
+    /** @var LocaleConfigurationInterface */
+    protected $localeConfiguration;
+
     /**
-     * @param NormalizerInterface   $normalizer
-     * @param DenormalizerInterface $denormalizer
+     * @param NormalizerInterface          $normalizer
+     * @param DenormalizerInterface        $denormalizer
+     * @param TokenStorageInterface        $tokenStorage
+     * @param LocaleConfigurationInterface $localeConfiguration
      */
-    public function __construct(NormalizerInterface $normalizer, DenormalizerInterface $denormalizer)
-    {
-        $this->normalizer   = $normalizer;
-        $this->denormalizer = $denormalizer;
+    public function __construct(
+        NormalizerInterface $normalizer,
+        DenormalizerInterface $denormalizer,
+        TokenStorageInterface $tokenStorage,
+        LocaleConfigurationInterface $localeConfiguration
+    ) {
+        $this->normalizer          = $normalizer;
+        $this->denormalizer        = $denormalizer;
+        $this->tokenStorage        = $tokenStorage;
+        $this->localeConfiguration = $localeConfiguration;
     }
 
     /**
@@ -56,7 +73,9 @@ class TransformProductTemplateValuesSubscriber implements EventSubscriberInterfa
             return;
         }
 
-        $values = $this->denormalizer->denormalize($data->getValuesData(), 'ProductValue[]', 'json');
+        $user = $this->getUser();
+        $context['decimal_separator'] = $this->localeConfiguration->getDecimalSeparator($user->getUiLocale());
+        $values = $this->denormalizer->denormalize($data->getValuesData(), 'ProductValue[]', 'json', $context);
         $data->setValues($values);
     }
 
@@ -71,7 +90,31 @@ class TransformProductTemplateValuesSubscriber implements EventSubscriberInterfa
             return;
         }
 
-        $valuesData = $this->normalizer->normalize($data->getValues(), 'json', ['entity' => 'product']);
+        $user = $this->getUser();
+        $valuesData = $this->normalizer->normalize($data->getValues(), 'json', [
+            'entity'            => 'product',
+            'decimal_separator' => $this->localeConfiguration->getDecimalSeparator($user->getUiLocale())
+        ]);
         $data->setValuesData($valuesData);
+    }
+
+    /**
+     * Get user
+     *
+     * @return mixed|null
+     */
+    protected function getUser()
+    {
+        $token = $this->tokenStorage->getToken();
+        if (null === $token) {
+            return null;
+        }
+
+        $user = $token->getUser();
+        if (null === $user) {
+            return null;
+        }
+
+        return $user;
     }
 }
