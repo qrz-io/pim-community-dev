@@ -15,6 +15,7 @@ use Pim\Bundle\CatalogBundle\Model\ProductInterface;
 use Pim\Bundle\CatalogBundle\Repository\AttributeRepositoryInterface;
 use Pim\Bundle\CatalogBundle\Repository\ProductRepositoryInterface;
 use Pim\Bundle\UserBundle\Context\UserContext;
+use Pim\Component\Localization\LocaleConfigurationInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -67,6 +68,9 @@ class ProductController
     /** @var ProductBuilderInterface */
     protected $productBuilder;
 
+    /** @var LocaleConfigurationInterface */
+    protected $localeConfiguration;
+
     /**
      * @param ProductRepositoryInterface   $productRepository
      * @param AttributeRepositoryInterface $attributeRepository
@@ -79,6 +83,7 @@ class ProductController
      * @param CollectionFilterInterface    $productEditDataFilter
      * @param RemoverInterface             $productRemover
      * @param ProductBuilderInterface      $productBuilder
+     * @param LocaleConfigurationInterface $localeConfiguration
      */
     public function __construct(
         ProductRepositoryInterface $productRepository,
@@ -91,7 +96,8 @@ class ProductController
         ObjectFilterInterface $objectFilter,
         CollectionFilterInterface $productEditDataFilter,
         RemoverInterface $productRemover,
-        ProductBuilderInterface $productBuilder
+        ProductBuilderInterface $productBuilder,
+        LocaleConfigurationInterface $localeConfiguration
     ) {
         $this->productRepository     = $productRepository;
         $this->attributeRepository   = $attributeRepository;
@@ -104,6 +110,7 @@ class ProductController
         $this->productEditDataFilter = $productEditDataFilter;
         $this->productRemover        = $productRemover;
         $this->productBuilder        = $productBuilder;
+        $this->localeConfiguration   = $localeConfiguration;
     }
 
     /**
@@ -136,15 +143,17 @@ class ProductController
         $this->productBuilder->addMissingAssociations($product);
         $channels = array_keys($this->userContext->getChannelChoicesWithUserChannel());
         $locales  = $this->userContext->getUserLocaleCodes();
+        $decimalSeparator = $this->localeConfiguration->getDecimalSeparator($this->userContext->getUiLocale());
 
         return new JsonResponse(
             $this->normalizer->normalize(
                 $product,
                 'internal_api',
                 [
-                    'locales'     => $locales,
-                    'channels'    => $channels,
-                    'filter_type' => 'pim.internal_api.product_value.view'
+                    'locales'           => $locales,
+                    'channels'          => $channels,
+                    'filter_type'       => 'pim.internal_api.product_value.view',
+                    'decimal_separator' => $decimalSeparator,
                 ]
             )
         );
