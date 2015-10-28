@@ -32,7 +32,7 @@ abstract class AbstractNumberLocalizer implements LocalizerInterface
             return $number;
         }
 
-        $this->checkOptions($options);
+        $options = $this->checkOptions($options);
         $matchesNumber = $this->getMatchesNumber($number);
         if (!isset($matchesNumber['decimal'])) {
             return $number;
@@ -75,7 +75,7 @@ abstract class AbstractNumberLocalizer implements LocalizerInterface
             return true;
         }
 
-        $this->checkOptions($options);
+        $options = $this->checkOptions($options);
 
         $matchesNumber = $this->getMatchesNumber($number);
         if (isset($matchesNumber['decimal']) && $matchesNumber['decimal'] !== $options['decimal_separator']) {
@@ -99,7 +99,7 @@ abstract class AbstractNumberLocalizer implements LocalizerInterface
             return $number;
         }
 
-        $this->checkOptions($options);
+        $options = $this->checkOptions($options);
 
         $matchesNumber = $this->getMatchesNumber($number);
         if (!isset($matchesNumber['decimal'])) {
@@ -131,11 +131,16 @@ abstract class AbstractNumberLocalizer implements LocalizerInterface
 
     /**
      * @param array $options
+     *
+     * @return array
      */
     protected function checkOptions(array $options)
     {
         if (!isset($options['decimal_separator']) || '' === $options['decimal_separator']) {
-            throw new MissingOptionsException('The option "decimal_separator" do not exist.');
+            //throw new MissingOptionsException('The option "decimal_separator" do not exist.');
+            $options['decimal_separator'] = static::DEFAULT_DECIMAL_SEPARATOR;
         }
+
+        return $options;
     }
 }

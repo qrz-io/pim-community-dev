@@ -40,7 +40,7 @@ class DateLocalizer implements LocalizerInterface
             return true;
         }
 
-        $this->checkOptions($options);
+        $options = $this->checkOptions($options);
 
         $datetime = $this->getDateTime($date, $options);
         if (false === $datetime) {
@@ -55,7 +55,7 @@ class DateLocalizer implements LocalizerInterface
      */
     public function convertLocalizedToDefault($date, array $options = [])
     {
-        $this->checkOptions($options);
+        $options = $this->checkOptions($options);
 
         if (null === $date || '' === $date) {
             return $date;
@@ -71,7 +71,7 @@ class DateLocalizer implements LocalizerInterface
      */
     public function convertDefaultToLocalized($date, array $options = [])
     {
-        $this->checkOptions($options);
+        $options = $this->checkOptions($options);
 
         if (null === $date || '' === $date) {
             return $date;
@@ -125,11 +125,16 @@ class DateLocalizer implements LocalizerInterface
 
     /**
      * @param array $options
+     *
+     * @return array
      */
     protected function checkOptions(array $options)
     {
         if (!isset($options['date_format']) || '' === $options['date_format']) {
-            throw new MissingOptionsException('The option "date_format" do not exist.');
+            //throw new MissingOptionsException('The option "date_format" do not exist.');
+            $options['date_format'] = static::DEFAULT_DATE_FORMAT;
         }
+
+        return $options;
     }
 }
