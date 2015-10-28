@@ -380,6 +380,7 @@ services:
             - '@pim_catalog.remover.product'
             - '@pim_catalog.builder.product'
             - '@pim_localization.configuration.locale'
+            - '@pim_localization.localizer.converter'
 
     pim_enrich.controller.rest.product_category:
         class: %pim_enrich.controller.rest.product_category.class%

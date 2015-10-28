@@ -16,6 +16,7 @@ use Pim\Bundle\CatalogBundle\Repository\AttributeRepositoryInterface;
 use Pim\Bundle\CatalogBundle\Repository\ProductRepositoryInterface;
 use Pim\Bundle\UserBundle\Context\UserContext;
 use Pim\Component\Localization\LocaleConfigurationInterface;
+use Pim\Component\Localization\Localizer\LocalizedAttributeConverterInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -70,20 +71,25 @@ class ProductController
 
     /** @var LocaleConfigurationInterface */
     protected $localeConfiguration;
+    /**
+     * @var LocalizedAttributeConverterInterface
+     */
+    private $localizedConverter;
 
     /**
-     * @param ProductRepositoryInterface   $productRepository
-     * @param AttributeRepositoryInterface $attributeRepository
-     * @param PropertySetterInterface      $productUpdater
-     * @param SaverInterface               $productSaver
-     * @param NormalizerInterface          $normalizer
-     * @param ValidatorInterface           $validator
-     * @param UserContext                  $userContext
-     * @param ObjectFilterInterface        $objectFilter
-     * @param CollectionFilterInterface    $productEditDataFilter
-     * @param RemoverInterface             $productRemover
-     * @param ProductBuilderInterface      $productBuilder
-     * @param LocaleConfigurationInterface $localeConfiguration
+     * @param ProductRepositoryInterface           $productRepository
+     * @param AttributeRepositoryInterface         $attributeRepository
+     * @param PropertySetterInterface              $productUpdater
+     * @param SaverInterface                       $productSaver
+     * @param NormalizerInterface                  $normalizer
+     * @param ValidatorInterface                   $validator
+     * @param UserContext                          $userContext
+     * @param ObjectFilterInterface                $objectFilter
+     * @param CollectionFilterInterface            $productEditDataFilter
+     * @param RemoverInterface                     $productRemover
+     * @param ProductBuilderInterface              $productBuilder
+     * @param LocaleConfigurationInterface         $localeConfiguration
+     * @param LocalizedAttributeConverterInterface $localizedConverter
      */
     public function __construct(
         ProductRepositoryInterface $productRepository,
@@ -97,7 +103,8 @@ class ProductController
         CollectionFilterInterface $productEditDataFilter,
         RemoverInterface $productRemover,
         ProductBuilderInterface $productBuilder,
-        LocaleConfigurationInterface $localeConfiguration
+        LocaleConfigurationInterface $localeConfiguration,
+        LocalizedAttributeConverterInterface $localizedConverter
     ) {
         $this->productRepository     = $productRepository;
         $this->attributeRepository   = $attributeRepository;
@@ -111,6 +118,7 @@ class ProductController
         $this->productRemover        = $productRemover;
         $this->productBuilder        = $productBuilder;
         $this->localeConfiguration   = $localeConfiguration;
+        $this->localizedConverter = $localizedConverter;
     }
 
     /**
@@ -192,9 +200,18 @@ class ProductController
         $violations = $this->validator->validate($product);
 
         if (0 === $violations->count()) {
+            $decimalSeparator = $this->localeConfiguration->getDecimalSeparator($this->userContext->getUiLocale());
+            $data['values'] = $this->localizedConverter->convert($data['values'], [
+                'decimal_separator' => $decimalSeparator,
+                'date_format'       => 'Y-m-d'
+            ]);
+            $this->updateProduct($product, $data);
+
             $this->productSaver->save($product);
 
-            return new JsonResponse($this->normalizer->normalize($product, 'internal_api'));
+            return new JsonResponse($this->normalizer->normalize($product, 'internal_api', [
+                'decimal_separator' => $decimalSeparator
+            ]));
         } else {
             $errors = $this->transformViolations($violations, $product);
 
