@@ -44,6 +44,8 @@ services:
             - '@pim_versioning.context.version'
             - '@pim_catalog.saver.group_options_resolver'
             - '@event_dispatcher'
+            - '@pim_localization.localizer.converter'
+            - '@pim_catalog.resolver.user_locale'
             - %pim_catalog.entity.product.class%
 
     pim_catalog.saver.family:

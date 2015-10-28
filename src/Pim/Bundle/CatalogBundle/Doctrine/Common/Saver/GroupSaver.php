@@ -12,7 +12,9 @@ use Pim\Bundle\CatalogBundle\Manager\ProductTemplateApplierInterface;
 use Pim\Bundle\CatalogBundle\Manager\ProductTemplateMediaManager;
 use Pim\Bundle\CatalogBundle\Model\GroupInterface;
 use Pim\Bundle\CatalogBundle\Model\ProductInterface;
+use Pim\Bundle\CatalogBundle\Resolver\UserLocaleResolver;
 use Pim\Bundle\VersioningBundle\Manager\VersionContext;
+use Pim\Component\Localization\Localizer\LocalizedAttributeConverterInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\GenericEvent;
 
@@ -49,15 +51,23 @@ class GroupSaver implements SaverInterface, BulkSaverInterface
     /** @var string */
     protected $productClassName;
 
+    /** @var LocalizedAttributeConverterInterface */
+    protected $localizedConverter;
+
+    /** @var UserLocaleResolver */
+    protected $userLocaleResolver;
+
     /**
-     * @param ObjectManager                   $objectManager
-     * @param BulkSaverInterface              $productSaver
-     * @param ProductTemplateMediaManager     $templateMediaManager
-     * @param ProductTemplateApplierInterface $productTplApplier
-     * @param VersionContext                  $versionContext
-     * @param SavingOptionsResolverInterface  $optionsResolver
-     * @param EventDispatcherInterface        $eventDispatcher
-     * @param string                          $productClassName
+     * @param ObjectManager                        $objectManager
+     * @param BulkSaverInterface                   $productSaver
+     * @param ProductTemplateMediaManager          $templateMediaManager
+     * @param ProductTemplateApplierInterface      $productTplApplier
+     * @param VersionContext                       $versionContext
+     * @param SavingOptionsResolverInterface       $optionsResolver
+     * @param EventDispatcherInterface             $eventDispatcher
+     * @param LocalizedAttributeConverterInterface $localizedConverter
+     * @param UserLocaleResolver                   $userLocaleResolver
+     * @param string                               $productClassName
      */
     public function __construct(
         ObjectManager $objectManager,
@@ -67,16 +77,20 @@ class GroupSaver implements SaverInterface, BulkSaverInterface
         VersionContext $versionContext,
         SavingOptionsResolverInterface $optionsResolver,
         EventDispatcherInterface $eventDispatcher,
+        LocalizedAttributeConverterInterface $localizedConverter,
+        UserLocaleResolver $userLocaleResolver,
         $productClassName
     ) {
-        $this->objectManager          = $objectManager;
-        $this->productSaver           = $productSaver;
-        $this->templateMediaManager   = $templateMediaManager;
-        $this->productTplApplier      = $productTplApplier;
-        $this->versionContext         = $versionContext;
-        $this->optionsResolver        = $optionsResolver;
-        $this->eventDispatcher        = $eventDispatcher;
-        $this->productClassName       = $productClassName;
+        $this->objectManager        = $objectManager;
+        $this->productSaver         = $productSaver;
+        $this->templateMediaManager = $templateMediaManager;
+        $this->productTplApplier    = $productTplApplier;
+        $this->versionContext       = $versionContext;
+        $this->optionsResolver      = $optionsResolver;
+        $this->eventDispatcher      = $eventDispatcher;
+        $this->localizedConverter   = $localizedConverter;
+        $this->productClassName     = $productClassName;
+        $this->userLocaleResolver   = $userLocaleResolver;
     }
 
     /**
@@ -106,6 +120,12 @@ class GroupSaver implements SaverInterface, BulkSaverInterface
         if ($group->getType()->isVariant()) {
             $template = $group->getProductTemplate();
             if (null !== $template) {
+                $userLocaleOptions = $this->userLocaleResolver->getOptions();
+                $valuesData = $this->localizedConverter->convert($template->getValuesData(), [
+                    'decimal_separator' => $userLocaleOptions['decimal_separator'],
+                    'date_format'       => 'Y-m-d',
+                ]);
+                $template->setValuesData($valuesData);
                 $this->templateMediaManager->handleProductTemplateMedia($template);
             }
         }
