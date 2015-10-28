@@ -12,6 +12,7 @@ use Pim\Bundle\CatalogBundle\Model\AttributeInterface;
 use Pim\Bundle\CatalogBundle\Model\LocaleInterface;
 use Pim\Bundle\CatalogBundle\Model\ProductValueInterface;
 use Pim\Bundle\CatalogBundle\Repository\AttributeRepositoryInterface;
+use Pim\Bundle\CatalogBundle\Resolver\UserLocaleResolver;
 use Pim\Bundle\UserBundle\Context\UserContext;
 use Pim\Component\Catalog\FileStorage;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -58,14 +59,18 @@ class EditCommonAttributes extends AbstractMassEditOperation
     /** @var ProductMassActionManager */
     protected $massActionManager;
 
+    /** @var UserLocaleResolver */
+    protected $userLocaleResolver;
+
     /**
      * @param ProductBuilderInterface      $productBuilder
      * @param UserContext                  $userContext
      * @param CatalogContext               $catalogContext
      * @param AttributeRepositoryInterface $attributeRepository
      * @param NormalizerInterface          $normalizer
-     * @param FileStorerInterface       $fileStorer
+     * @param FileStorerInterface          $fileStorer
      * @param ProductMassActionManager     $massActionManager
+     * @param UserLocaleResolver           $userLocaleResolver
      */
     public function __construct(
         ProductBuilderInterface $productBuilder,
@@ -74,7 +79,8 @@ class EditCommonAttributes extends AbstractMassEditOperation
         AttributeRepositoryInterface $attributeRepository,
         NormalizerInterface $normalizer,
         FileStorerInterface $fileStorer,
-        ProductMassActionManager $massActionManager
+        ProductMassActionManager $massActionManager,
+        UserLocaleResolver $userLocaleResolver
     ) {
         $this->productBuilder      = $productBuilder;
         $this->userContext         = $userContext;
@@ -83,8 +89,9 @@ class EditCommonAttributes extends AbstractMassEditOperation
         $this->values              = new ArrayCollection();
         $this->normalizer          = $normalizer;
         $this->attributeRepository = $attributeRepository;
-        $this->fileStorer       = $fileStorer;
+        $this->fileStorer          = $fileStorer;
         $this->massActionManager   = $massActionManager;
+        $this->userLocaleResolver  = $userLocaleResolver;
     }
 
     /**
@@ -279,9 +286,10 @@ class EditCommonAttributes extends AbstractMassEditOperation
     public function getActions()
     {
         $actions = [];
+        $options = array_merge($this->userLocaleResolver->getOptions(), ['entity' => 'product']);
 
         foreach ($this->values as $value) {
-            $rawData = $this->normalizer->normalize($value->getData(), 'json', ['entity' => 'product']);
+            $rawData = $this->normalizer->normalize($value->getData(), 'json', $options);
             // if the value is localizable, let's use the locale the user has chosen in the form
             $locale = null !== $value->getLocale() ? $this->getLocale()->getCode() : null;
 

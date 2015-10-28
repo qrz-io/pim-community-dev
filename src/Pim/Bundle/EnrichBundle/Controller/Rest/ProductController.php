@@ -15,7 +15,6 @@ use Pim\Bundle\CatalogBundle\Model\ProductInterface;
 use Pim\Bundle\CatalogBundle\Repository\AttributeRepositoryInterface;
 use Pim\Bundle\CatalogBundle\Repository\ProductRepositoryInterface;
 use Pim\Bundle\UserBundle\Context\UserContext;
-use Pim\Component\Localization\LocaleConfigurationInterface;
 use Pim\Component\Localization\Localizer\LocalizedAttributeConverterInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -69,12 +68,8 @@ class ProductController
     /** @var ProductBuilderInterface */
     protected $productBuilder;
 
-    /** @var LocaleConfigurationInterface */
-    protected $localeConfiguration;
-    /**
-     * @var LocalizedAttributeConverterInterface
-     */
-    private $localizedConverter;
+    /** @var LocalizedAttributeConverterInterface */
+    protected $localizedConverter;
 
     /**
      * @param ProductRepositoryInterface           $productRepository
@@ -88,7 +83,6 @@ class ProductController
      * @param CollectionFilterInterface            $productEditDataFilter
      * @param RemoverInterface                     $productRemover
      * @param ProductBuilderInterface              $productBuilder
-     * @param LocaleConfigurationInterface         $localeConfiguration
      * @param LocalizedAttributeConverterInterface $localizedConverter
      */
     public function __construct(
@@ -103,7 +97,6 @@ class ProductController
         CollectionFilterInterface $productEditDataFilter,
         RemoverInterface $productRemover,
         ProductBuilderInterface $productBuilder,
-        LocaleConfigurationInterface $localeConfiguration,
         LocalizedAttributeConverterInterface $localizedConverter
     ) {
         $this->productRepository     = $productRepository;
@@ -117,8 +110,7 @@ class ProductController
         $this->productEditDataFilter = $productEditDataFilter;
         $this->productRemover        = $productRemover;
         $this->productBuilder        = $productBuilder;
-        $this->localeConfiguration   = $localeConfiguration;
-        $this->localizedConverter = $localizedConverter;
+        $this->localizedConverter    = $localizedConverter;
     }
 
     /**
@@ -151,17 +143,16 @@ class ProductController
         $this->productBuilder->addMissingAssociations($product);
         $channels = array_keys($this->userContext->getChannelChoicesWithUserChannel());
         $locales  = $this->userContext->getUserLocaleCodes();
-        $decimalSeparator = $this->localeConfiguration->getDecimalSeparator($this->userContext->getUiLocale());
 
         return new JsonResponse(
             $this->normalizer->normalize(
                 $product,
                 'internal_api',
                 [
-                    'locales'           => $locales,
-                    'channels'          => $channels,
-                    'filter_type'       => 'pim.internal_api.product_value.view',
-                    'decimal_separator' => $decimalSeparator,
+                    'locales'     => $locales,
+                    'channels'    => $channels,
+                    'filter_type' => 'pim.internal_api.product_value.view',
+                    'locale'      => $this->userContext->getUiLocale()->getCode()
                 ]
             )
         );
@@ -200,17 +191,16 @@ class ProductController
         $violations = $this->validator->validate($product);
 
         if (0 === $violations->count()) {
-            $decimalSeparator = $this->localeConfiguration->getDecimalSeparator($this->userContext->getUiLocale());
-            $data['values'] = $this->localizedConverter->convert($data['values'], [
-                'decimal_separator' => $decimalSeparator,
-                'date_format'       => 'Y-m-d'
-            ]);
+            $data['values'] = $this->localizedConverter->convert(
+                $data['values'],
+                ['locale' => $this->userContext->getUiLocale()->getCode()]
+            );
             $this->updateProduct($product, $data);
 
             $this->productSaver->save($product);
 
             return new JsonResponse($this->normalizer->normalize($product, 'internal_api', [
-                'decimal_separator' => $decimalSeparator
+                'locale' => $this->userContext->getUiLocale()->getCode()
             ]));
         } else {
             $errors = $this->transformViolations($violations, $product);
