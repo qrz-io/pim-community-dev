@@ -181,6 +181,19 @@ class EditCommonAttributes extends AbstractMassEditOperation
     /**
      * {@inheritdoc}
      */
+    public function getBatchConfig()
+    {
+        $config = json_decode(stripslashes(parent::getBatchConfig()), true);
+
+        $userLocaleOptions = $this->userLocaleResolver->getOptions();
+        $config['decimal_separator'] = $userLocaleOptions['decimal_separator'];
+
+        return addslashes(json_encode($config));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function initialize()
     {
         $locale = $this->getLocale()->getCode();
