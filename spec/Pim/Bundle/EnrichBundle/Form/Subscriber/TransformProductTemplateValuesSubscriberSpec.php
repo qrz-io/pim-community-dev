@@ -6,15 +6,19 @@ use Doctrine\Common\Collections\ArrayCollection;
 use PhpSpec\ObjectBehavior;
 use Pim\Bundle\CatalogBundle\Model\ProductTemplateInterface;
 use Pim\Bundle\CatalogBundle\Model\ProductValueInterface;
+use Pim\Bundle\CatalogBundle\Resolver\UserLocaleResolver;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class TransformProductTemplateValuesSubscriberSpec extends ObjectBehavior
 {
-    function let(NormalizerInterface $normalizer, DenormalizerInterface $denormalizer)
-    {
-        $this->beConstructedWith($normalizer, $denormalizer);
+    function let(
+        NormalizerInterface $normalizer,
+        DenormalizerInterface $denormalizer,
+        UserLocaleResolver $userLocaleResolver
+    ) {
+        $this->beConstructedWith($normalizer, $denormalizer, $userLocaleResolver);
     }
 
     function it_is_initializable()
@@ -39,6 +43,7 @@ class TransformProductTemplateValuesSubscriberSpec extends ObjectBehavior
 
     function it_sets_denormalized_values_to_product_template_before_setting_form_data(
         $denormalizer,
+        $userLocaleResolver,
         FormEvent $event,
         ProductTemplateInterface $template,
         ProductValueInterface $value
@@ -46,8 +51,10 @@ class TransformProductTemplateValuesSubscriberSpec extends ObjectBehavior
         $event->getData()->willReturn($template);
         $template->getValuesData()->willReturn(['foo' => 'bar']);
         $collection = new ArrayCollection([$value]);
+        $userLocaleResolver->getOptions()->willReturn(['decimal_separator' => '.']);
 
-        $denormalizer->denormalize(['foo' => 'bar'], 'ProductValue[]', 'json')->willReturn($collection);
+        $denormalizer->denormalize(['foo' => 'bar'], 'ProductValue[]', 'json', ['decimal_separator' => '.'])
+            ->willReturn($collection);
 
         $template->setValues($collection)->shouldBeCalled();
 
@@ -56,13 +63,17 @@ class TransformProductTemplateValuesSubscriberSpec extends ObjectBehavior
 
     function it_updates_product_template_normalized_values_after_submitting_the_form(
         $normalizer,
+        $userLocaleResolver,
         FormEvent $event,
         ProductTemplateInterface $template,
         ProductValueInterface $value
     ) {
         $event->getData()->willReturn($template);
         $template->getValues()->willReturn([$value]);
-        $normalizer->normalize([$value], 'json', ['entity' => 'product'])->willReturn(['foo' => 'bar']);
+        $userLocaleResolver->getOptions()->willReturn(['decimal_separator' => '.']);
+
+        $normalizer->normalize([$value], 'json', ['entity' => 'product', 'decimal_separator' => '.'])
+            ->willReturn(['foo' => 'bar']);
 
         $template->setValuesData(['foo' => 'bar'])->shouldBeCalled();
 
