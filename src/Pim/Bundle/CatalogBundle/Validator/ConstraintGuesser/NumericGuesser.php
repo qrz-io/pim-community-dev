@@ -5,7 +5,7 @@ namespace Pim\Bundle\CatalogBundle\Validator\ConstraintGuesser;
 use Pim\Bundle\CatalogBundle\AttributeType\AttributeTypes;
 use Pim\Bundle\CatalogBundle\Model\AttributeInterface;
 use Pim\Bundle\CatalogBundle\Validator\ConstraintGuesserInterface;
-use Pim\Bundle\CatalogBundle\Validator\Constraints\Numeric;
+use Pim\Bundle\CatalogBundle\Validator\Constraints\IsNumeric;
 
 /**
  * Guesser for numeric attributes
@@ -35,6 +35,6 @@ class NumericGuesser implements ConstraintGuesserInterface
      */
     public function guessConstraints(AttributeInterface $attribute)
     {
-        return [new Numeric()];
+        return [new IsNumeric()];
     }
 }

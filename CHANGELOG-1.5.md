@@ -39,3 +39,7 @@
 - Change constructor of `Pim\Component\Localization\Normalizer\ProductValueNormalizer`. Add `Pim\Component\Localization\Localizer\LocalizerRegistryInterface`.
 - Change constructor of `Pim\Bundle\BaseConnectorBundle\Processor\Normalization\VariantGroupProcessor`. Add `array` of available decimal separators and `array` of available date formats as third and fourth parameter.
 - Change constructor of `Pim\Bundle\EnrichBundle\Connector\Processor\QuickExport\ProductToFlatArrayProcessor`. Add `Pim\Component\Localization\Provider\DateFormatProviderInterface` as third parameter.
+- Rename `Pim\Bundle\CatalogBundle\Validator\Constraints\Numeric` to `Pim\Bundle\CatalogBundle\Validator\Constraints\IsNumeric` to fix PHP7 compatibility
+- Rename `Pim\Bundle\CatalogBundle\Validator\Constraints\NumericValidator` to `Pim\Bundle\CatalogBundle\Validator\Constraints\IsNumericValidator` to fix PHP7 compatibility
+- Rename `Pim\Bundle\CatalogBundle\Validator\Constraints\String` to `Pim\Bundle\CatalogBundle\Validator\Constraints\IsString` to fix PHP7 compatibility
+- Rename `Pim\Bundle\CatalogBundle\Validator\Constraints\StringValidator` to `Pim\Bundle\CatalogBundle\Validator\Constraints\IsStringValidator` to fix PHP7 compatibility

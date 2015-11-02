@@ -5,7 +5,7 @@ namespace Pim\Bundle\CatalogBundle\Validator\ConstraintGuesser;
 use Pim\Bundle\CatalogBundle\AttributeType\AttributeTypes;
 use Pim\Bundle\CatalogBundle\Model\AttributeInterface;
 use Pim\Bundle\CatalogBundle\Validator\ConstraintGuesserInterface;
-use Pim\Bundle\CatalogBundle\Validator\Constraints\String;
+use Pim\Bundle\CatalogBundle\Validator\Constraints\IsString;
 
 /**
  * Guesser for string attributes
@@ -36,6 +36,6 @@ class StringGuesser implements ConstraintGuesserInterface
      */
     public function guessConstraints(AttributeInterface $attribute)
     {
-        return [new String()];
+        return [new IsString()];
     }
 }
