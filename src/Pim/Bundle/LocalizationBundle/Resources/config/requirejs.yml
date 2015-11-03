@@ -1,0 +1,28 @@
+config:
+    shim:
+        'moment':
+            exports:
+                - 'moment'
+        'numeral':
+            exports:
+                - 'numeral'
+        'pim/formatter/number':
+            deps:
+                - 'numeral'
+                - 'pim/locale-settings'
+    map:
+        '*':
+            'moment': 'pim/moment-l10n'
+        'pim/moment-l10n':
+            'moment': 'moment'
+
+    paths:
+        'moment': 'bundles/pimlocalization/lib/moment.js'
+        'numeral': 'bundles/pimlocalization/lib/numeral.js'
+        'pim/locale-settings': 'bundles/pimlocalization/js/locale-settings.js'
+        'pim/locale-settings/data': '../js/oro.locale_data.js'
+        'pim/formatter/name': 'bundles/pimlocalization/js/formatter/name.js'
+        'pim/formatter/address': 'bundles/pimlocalization/js/formatter/address.js'
+        'pim/formatter/number': 'bundles/pimlocalization/js/formatter/number.js'
+        'pim/formatter/datetime': 'bundles/pimlocalization/js/formatter/datetime.js'
+        'pim/moment-l10n': 'bundles/pimlocalization/js/moment-l10n.js'

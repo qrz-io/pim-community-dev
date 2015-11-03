@@ -1,5 +1,5 @@
 /* global define */
-define(['jquery', 'underscore', 'oro/datafilter/date-filter', 'oro/locale-settings'],
+define(['jquery', 'underscore', 'oro/datafilter/date-filter', 'pim/locale-settings'],
     function($, _, DateFilter, localeSettings) {
     'use strict';
     /**

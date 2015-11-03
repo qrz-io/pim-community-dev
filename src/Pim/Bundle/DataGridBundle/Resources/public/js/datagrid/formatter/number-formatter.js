@@ -1,5 +1,5 @@
 /* global define */
-define(['underscore', 'oro/datagrid/cell-formatter', 'oro/formatter/number'],
+define(['underscore', 'oro/datagrid/cell-formatter', 'pim/formatter/number'],
 function(_, CellFormatter, formatter) {
     'use strict';
 

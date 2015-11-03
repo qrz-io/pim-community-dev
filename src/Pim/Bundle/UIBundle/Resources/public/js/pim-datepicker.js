@@ -1,5 +1,5 @@
 define(
-    ['jquery', 'oro/formatter/datetime', 'jquery-ui-full'],
+    ['jquery', 'pim/formatter/datetime', 'jquery-ui-full'],
     function ($, datetimeFormatter) {
         'use strict';
 

@@ -1,5 +1,5 @@
 /* global define */
-define(['underscore', 'oro/translator', 'oro/formatter/datetime'],
+define(['underscore', 'oro/translator', 'pim/formatter/datetime'],
 function (_, __, datetimeFormatter) {
     'use strict';
 

@@ -1,4 +1,4 @@
-define(['jquery', 'oro/translator', 'oro/locale-settings', 'jquery-ui'],
+define(['jquery', 'oro/translator', 'pim/locale-settings', 'jquery-ui'],
 function ($, __, localeSettings) {
     'use strict';
 
