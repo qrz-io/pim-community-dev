@@ -22,10 +22,11 @@ class GroupSavingOptionsResolver implements SavingOptionsResolverInterface
         $resolver = $this->createOptionsResolver();
         $resolver->setDefaults(
             [
-                'flush'                   => true,
-                'copy_values_to_products' => false,
-                'add_products'            => [],
-                'remove_products'         => [],
+                'flush'                    => true,
+                'copy_values_to_products'  => false,
+                'add_products'             => [],
+                'remove_products'          => [],
+                'convert_localized_values' => true
             ]
         );
         $options = $resolver->resolve($options);
@@ -47,11 +48,20 @@ class GroupSavingOptionsResolver implements SavingOptionsResolverInterface
     protected function createOptionsResolver()
     {
         $resolver = new OptionsResolver();
-        $resolver->setDefined(['flush', 'copy_values_to_products', 'add_products', 'remove_products'])
+        $resolver->setDefined(
+            [
+                'flush',
+                'copy_values_to_products',
+                'add_products',
+                'remove_products',
+                'convert_localized_values'
+            ])
             ->setAllowedTypes('flush', 'bool')
             ->setAllowedTypes('copy_values_to_products', 'bool')
             ->setAllowedTypes('add_products', 'array')
-            ->setAllowedTypes('remove_products', 'array');
+            ->setAllowedTypes('remove_products', 'array')
+            ->setAllowedTypes('convert_localized_values', 'bool')
+        ;
 
         return $resolver;
     }

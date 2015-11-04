@@ -12,6 +12,7 @@ use Pim\Bundle\CatalogBundle\Manager\ProductTemplateApplierInterface;
 use Pim\Bundle\CatalogBundle\Manager\ProductTemplateMediaManager;
 use Pim\Bundle\CatalogBundle\Model\GroupInterface;
 use Pim\Bundle\CatalogBundle\Model\ProductInterface;
+use Pim\Bundle\CatalogBundle\Model\ProductTemplateInterface;
 use Pim\Bundle\CatalogBundle\Resolver\UserLocaleResolver;
 use Pim\Bundle\VersioningBundle\Manager\VersionContext;
 use Pim\Component\Localization\Localizer\LocalizedAttributeConverterInterface;
@@ -120,12 +121,10 @@ class GroupSaver implements SaverInterface, BulkSaverInterface
         if ($group->getType()->isVariant()) {
             $template = $group->getProductTemplate();
             if (null !== $template) {
-                $userLocaleOptions = $this->userLocaleResolver->getOptions();
-                $valuesData = $this->localizedConverter->convert($template->getValuesData(), [
-                    'decimal_separator' => $userLocaleOptions['decimal_separator'],
-                    'date_format'       => 'Y-m-d',
-                ]);
-                $template->setValuesData($valuesData);
+                if (true === $options['convert_localized_values']) {
+                    $this->convertLocalizedValues($template);
+                }
+
                 $this->templateMediaManager->handleProductTemplateMedia($template);
             }
         }
@@ -202,5 +201,16 @@ class GroupSaver implements SaverInterface, BulkSaverInterface
         $template = $group->getProductTemplate();
         $products = $group->getProducts()->toArray();
         $this->productTplApplier->apply($template, $products);
+    }
+
+    /**
+     * @param ProductTemplateInterface $template
+     */
+    protected function convertLocalizedValues(ProductTemplateInterface $template)
+    {
+        $options    = $this->userLocaleResolver->getOptions();
+        $valuesData = $this->localizedConverter->convert($template->getValuesData(), $options);
+
+        $template->setValuesData($valuesData);
     }
 }

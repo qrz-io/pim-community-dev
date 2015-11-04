@@ -17,10 +17,22 @@ class GroupSavingOptionsResolverSpec extends ObjectBehavior
     {
         $this
             ->resolveSaveOptions(
-                ['flush' => false, 'copy_values_to_products' => true, 'add_products' => [$added], 'remove_products' => [$removed]]
+                [
+                    'flush'                   => false,
+                    'copy_values_to_products' => true,
+                    'add_products'            => [$added],
+                    'remove_products'         => [$removed],
+                    'convert_localized_values' => false
+                ]
             )
             ->shouldReturn(
-                ['flush' => false, 'copy_values_to_products' => true, 'add_products' => [$added], 'remove_products' => [$removed]]
+                [
+                    'flush'                    => false,
+                    'copy_values_to_products'  => true,
+                    'add_products'             => [$added],
+                    'remove_products'          => [$removed],
+                    'convert_localized_values' => false
+                ]
             )
         ;
     }
@@ -30,7 +42,13 @@ class GroupSavingOptionsResolverSpec extends ObjectBehavior
         $this
             ->resolveSaveOptions([])
             ->shouldReturn(
-                ['flush' => true, 'copy_values_to_products' => false, 'add_products' => [], 'remove_products' => []]
+                [
+                    'flush'                    => true,
+                    'copy_values_to_products'  => false,
+                    'add_products'             => [],
+                    'remove_products'          => [],
+                    'convert_localized_values' => true
+                ]
             )
         ;
     }
@@ -39,10 +57,22 @@ class GroupSavingOptionsResolverSpec extends ObjectBehavior
     {
         $this
             ->resolveSaveOptions(
-                ['flush' => false, 'copy_values_to_products' => true, 'add_products' => [$added], 'remove_products' => [$removed]]
+                [
+                    'flush'                    => false,
+                    'copy_values_to_products'  => true,
+                    'add_products'             => [$added],
+                    'remove_products'          => [$removed],
+                    'convert_localized_values' => true
+                ]
             )
             ->shouldReturn(
-                ['flush' => false, 'copy_values_to_products' => true, 'add_products' => [$added], 'remove_products' => [$removed]]
+                [
+                    'flush'                    => false,
+                    'copy_values_to_products'  => true,
+                    'add_products'             => [$added],
+                    'remove_products'          => [$removed],
+                    'convert_localized_values' => true
+                ]
             )
         ;
     }
@@ -52,7 +82,13 @@ class GroupSavingOptionsResolverSpec extends ObjectBehavior
         $this
             ->resolveSaveOptions([])
             ->shouldReturn(
-                ['flush' => true, 'copy_values_to_products' => false, 'add_products' => [], 'remove_products' => []]
+                [
+                    'flush'                    => true,
+                    'copy_values_to_products'  => false,
+                    'add_products'             => [],
+                    'remove_products'          => [],
+                    'convert_localized_values' => true
+                ]
             )
         ;
     }
@@ -60,7 +96,7 @@ class GroupSavingOptionsResolverSpec extends ObjectBehavior
     function it_throws_an_exception_when_resolve_unknown_saving_option()
     {
         $this
-            ->shouldThrow(new UndefinedOptionsException('The option "fake_option" does not exist. Defined options are: "add_products", "copy_values_to_products", "flush", "remove_products".'))
+            ->shouldThrow(new UndefinedOptionsException('The option "fake_option" does not exist. Defined options are: "add_products", "convert_localized_values", "copy_values_to_products", "flush", "remove_products".'))
             ->duringResolveSaveOptions(['fake_option' => true, 'copy_values_to_products' => true]);
     }
 }

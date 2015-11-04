@@ -169,6 +169,8 @@ class GroupSaverSpec extends ObjectBehavior
         $objectManager,
         $templateApplier,
         $eventDispatcher,
+        $localizedConverter,
+        $userLocaleResolver,
         GroupInterface $group,
         GroupType $type,
         ProductInterface $product,
@@ -177,10 +179,11 @@ class GroupSaverSpec extends ObjectBehavior
     ) {
         $optionsResolver->resolveSaveOptions(['copy_values_to_products' => true])->willReturn(
             [
-                'flush'                   => true,
-                'copy_values_to_products' => true,
-                'add_products'            => [],
-                'remove_products'         => [],
+                'flush'                    => true,
+                'copy_values_to_products'  => true,
+                'add_products'             => [],
+                'remove_products'          => [],
+                'convert_localized_values' => true
             ]
         );
 
@@ -190,9 +193,15 @@ class GroupSaverSpec extends ObjectBehavior
         $objectManager->flush()->shouldBeCalled();
 
         $type->isVariant()->willReturn(true);
+        $template->getValuesData()->willReturn(['number' => '12,60']);
         $group->getProductTemplate()->willReturn($template);
         $group->getProducts()->willReturn($products);
         $products->toArray()->willReturn([$product]);
+
+        $userLocaleResolver->getOptions()->willReturn(['decimal_separator' => ',']);
+        $localizedConverter->convert(['number' => '12,60'], ['decimal_separator' => ',', 'date_format' => 'Y-m-d'])
+            ->willReturn(['number' => '12.60']);
+        $template->setValuesData(['number' => '12.60'])->shouldBeCalled();
 
         $templateApplier
             ->apply($template, [$product])

@@ -127,7 +127,7 @@ class VariantGroupAttributeController
         $template = $group->getProductTemplate();
         if (null !== $template) {
             $this->templateBuilder->removeAttribute($template, $attribute);
-            $this->groupSaver->save($group);
+            $this->groupSaver->save($group, ['convert_localized_values' => false]);
         }
 
         if ($request->isXmlHttpRequest()) {
