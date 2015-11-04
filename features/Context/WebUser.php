@@ -85,7 +85,6 @@ class WebUser extends RawMinkContext
         $entity = implode('', array_map('ucfirst', explode(' ', $entity)));
         $this->getPage(sprintf('%s index', $entity))->clickCreationLink();
         $this->getNavigationContext()->currentPage = sprintf('%s creation', $entity);
-        $this->wait();
     }
 
     /**
@@ -111,7 +110,6 @@ class WebUser extends RawMinkContext
     public function iChooseTheAttributeType($type)
     {
         $this->getCurrentPage()->clickLink($type);
-        $this->wait();
     }
 
     /**
@@ -126,7 +124,7 @@ class WebUser extends RawMinkContext
             $this->getMainContext()->executeScript(
                 sprintf("require(['oro/navigation'], function (Nav) { Nav.getInstance().setLocation('%s'); } );", $url)
             );
-            $this->wait();
+            $this->wait("$('.jstree-loading').length == 0");
 
             $currentUrl = $this->getSession()->getCurrentUrl();
             $currentUrl = explode('#url=', $currentUrl);
@@ -152,7 +150,7 @@ class WebUser extends RawMinkContext
     public function iSelectTheTree($category)
     {
         $this->getCurrentPage()->selectTree($category);
-        $this->wait();
+        $this->wait("$('.jstree-loading').length == 0");
     }
 
     /**
@@ -162,9 +160,9 @@ class WebUser extends RawMinkContext
      */
     public function iExpandTheCategory($category)
     {
-        $this->wait(); // Make sure that the tree is loaded
+        $this->wait("$('.jstree-loading').length == 0"); // Make sure that the tree is loaded
         $this->getCurrentPage()->expandCategory($category);
-        $this->wait();
+        $this->wait("$('.jstree-loading').length == 0");
     }
 
     /**
@@ -186,7 +184,7 @@ class WebUser extends RawMinkContext
     public function iDragTheCategoryToTheCategory($category1, $category2)
     {
         $this->getCurrentPage()->dragCategoryTo($category1, $category2);
-        $this->wait();
+        $this->wait("$('.jstree-loading').length == 0");
     }
 
     /**
@@ -200,7 +198,7 @@ class WebUser extends RawMinkContext
      */
     public function iShouldSeeTheCategoryUnderTheCategory($not, $child, $parent)
     {
-        $this->wait(); // Make sure that the tree is loaded
+        $this->wait("$('.jstree-loading').length == 0"); // Make sure that the tree is loaded
 
         $parentNode = $this->getCurrentPage()->findCategoryInTree($parent);
         $childNode  = $parentNode->getParent()->find('css', sprintf('li a:contains("%s")', $child));
@@ -228,7 +226,6 @@ class WebUser extends RawMinkContext
         $tabLocator = sprintf('$("a:contains(\'%s\')").length > 0;', $tab);
         $this->wait($tabLocator);
         $this->getCurrentPage()->visitTab($tab);
-        $this->wait();
     }
 
     /**
@@ -268,8 +265,6 @@ class WebUser extends RawMinkContext
 
             return false;
         });
-
-        $this->wait();
     }
 
     /**
@@ -322,7 +317,6 @@ class WebUser extends RawMinkContext
     public function iVisitTheGroup($group)
     {
         $this->getCurrentPage()->visitGroup($group);
-        $this->wait();
     }
 
     /**
@@ -333,7 +327,6 @@ class WebUser extends RawMinkContext
     public function iSelectTheAssociation($association)
     {
         $this->getCurrentPage()->selectAssociation($association);
-        $this->wait();
     }
 
     /**
@@ -385,7 +378,6 @@ class WebUser extends RawMinkContext
     {
         foreach ($this->listToArray($currencies) as $currency) {
             $this->getCurrentPage()->clickOnAction($currency, 'Change status');
-            $this->wait();
         }
     }
 
@@ -406,9 +398,7 @@ class WebUser extends RawMinkContext
      */
     public function iSwitchTheLocaleTo($locale)
     {
-        $this->wait();
         $this->getCurrentPage()->switchLocale($locale);
-        $this->wait();
     }
 
     /**
@@ -419,7 +409,6 @@ class WebUser extends RawMinkContext
     public function iSwitchTheScopeTo($scope)
     {
         $this->getCurrentPage()->switchScope($scope);
-        $this->wait();
     }
 
     /**
@@ -484,8 +473,6 @@ class WebUser extends RawMinkContext
     public function iConfirmThe()
     {
         $this->getCurrentPage()->confirmDialog();
-
-        $this->wait();
     }
 
     /**
@@ -502,10 +489,6 @@ class WebUser extends RawMinkContext
     public function iSave()
     {
         $this->getCurrentPage()->save();
-
-        if (!($this->getSession()->getDriver() instanceof Selenium2Driver)) {
-            $this->wait();
-        }
     }
 
     /**
@@ -514,7 +497,6 @@ class WebUser extends RawMinkContext
     public function iSaveAndClose()
     {
         $this->getCurrentPage()->saveAndClose();
-        $this->wait();
     }
 
     /**
@@ -526,7 +508,6 @@ class WebUser extends RawMinkContext
     public function iChangeTheAttributePositionTo($attribute, $position)
     {
         $this->getCurrentPage()->dragAttributeToPosition($attribute, $position)->save();
-        $this->wait();
     }
 
     /**
@@ -594,7 +575,6 @@ class WebUser extends RawMinkContext
         $page       = $this->getCurrentPage();
         $attributes = $this->listToArray($attributes);
         $page->visitGroup($group);
-        $this->wait();
 
         $group = $this->getFixturesContext()->findAttributeGroup($group);
 
@@ -835,7 +815,6 @@ class WebUser extends RawMinkContext
      */
     public function theFieldShouldBeReadOnly($label)
     {
-        $this->wait();
         $field = $this->getCurrentPage()->findField($label);
 
         if (!$field->hasAttribute('disabled')) {
@@ -941,7 +920,6 @@ class WebUser extends RawMinkContext
         );
 
         $this->getCurrentPage()->fillField($field, $value);
-        $this->wait();
     }
 
     /**
@@ -989,7 +967,6 @@ class WebUser extends RawMinkContext
     public function iAddAvailableAttributes($attributes)
     {
         $this->getCurrentPage()->addAvailableAttributes($this->listToArray($attributes));
-        $this->wait();
     }
 
     /**
@@ -1108,7 +1085,6 @@ class WebUser extends RawMinkContext
         }
 
         $link->click();
-        $this->wait();
     }
 
     /**
@@ -1152,8 +1128,6 @@ class WebUser extends RawMinkContext
         });
 
         $addButton->click();
-
-        $this->wait();
     }
 
     /**
@@ -1416,7 +1390,6 @@ class WebUser extends RawMinkContext
         }
 
         $this->getCurrentPage()->attachFileToField($field, $file);
-        $this->wait();
     }
 
     /**
@@ -1426,14 +1399,12 @@ class WebUser extends RawMinkContext
      */
     public function iRemoveTheFile($field)
     {
-        $this->wait();
         $script = sprintf("$('label:contains(\"%s\")').parents('.form-field').find('.clear-field').click();", $field);
         if (!$this->getMainContext()->executeScript($script)) {
             $this->getCurrentPage()->removeFileFromField($field);
         }
 
         $this->getSession()->executeScript('$(\'.edit .field-input input[type="file"]\').trigger(\'change\');');
-        $this->wait();
     }
 
     /**
@@ -1451,7 +1422,6 @@ class WebUser extends RawMinkContext
             $this->getSession()->executeScript(
                 "$('[target]').removeAttr('target');"
             );
-            $this->wait();
             $this->getCurrentPage()
                 ->find('css', sprintf('div.preview span:contains("%s")', $link))
                 ->getParent()
@@ -1490,7 +1460,6 @@ class WebUser extends RawMinkContext
     {
         foreach ($table->getHash() as $data) {
             $this->getCurrentPage()->addOption($data['Code']);
-            $this->wait();
         }
     }
 
@@ -1503,7 +1472,6 @@ class WebUser extends RawMinkContext
     public function iEditTheFollowingAttributeOptions($oldOptionName, $newOptionName)
     {
         $this->getCurrentPage()->editOption($oldOptionName, $newOptionName);
-        $this->wait();
     }
 
     /**
@@ -1515,7 +1483,6 @@ class WebUser extends RawMinkContext
     public function iEditAndCancelToEditTheFollowingAttributeOptions($oldOptionName, $newOptionName)
     {
         $this->getCurrentPage()->editOptionAndCancel($oldOptionName, $newOptionName);
-        $this->wait();
     }
 
     /**
@@ -1530,7 +1497,6 @@ class WebUser extends RawMinkContext
 
             return true;
         });
-        $this->wait();
     }
 
     /**
@@ -1581,7 +1547,6 @@ class WebUser extends RawMinkContext
         }, 20, sprintf('Button or link containing "%s" not found in the modal.', $buttonLabel));
 
         $buttonElement->press();
-        $this->wait();
     }
 
     /**
@@ -1596,7 +1561,6 @@ class WebUser extends RawMinkContext
             ->getCurrentPage()
             ->getDropdownButtonItem($item, $button)
             ->click();
-        $this->wait();
     }
 
     /**
@@ -1608,7 +1572,6 @@ class WebUser extends RawMinkContext
     {
         $action = $action . 'Product';
         $this->getCurrentPage()->$action()->save();
-        $this->wait();
     }
 
     /**
@@ -1622,7 +1585,6 @@ class WebUser extends RawMinkContext
         $this->getCurrentPage()->toggleSwitch('To enable', $status);
         $this->getCurrentPage()->next();
         $this->getCurrentPage()->confirm();
-        $this->wait();
     }
 
     /**
@@ -1642,7 +1604,6 @@ class WebUser extends RawMinkContext
     public function iCheckTheSwitch($status, $locator)
     {
         $this->getCurrentPage()->toggleSwitch($locator, $status === '');
-        $this->wait();
     }
 
     /**
@@ -1660,7 +1621,6 @@ class WebUser extends RawMinkContext
         if ($switch->isChecked() !== $on) {
             $switch->getParent()->find('css', 'label')->click();
         }
-        $this->wait();
     }
 
     /**
@@ -1758,7 +1718,6 @@ class WebUser extends RawMinkContext
             } else {
                 $category->click();
             }
-            $this->wait();
         }
     }
 
@@ -1785,7 +1744,6 @@ class WebUser extends RawMinkContext
     public function iClickOnInTheRightClickMenu($action)
     {
         $this->getCurrentPage()->rightClickAction($action);
-        $this->wait();
     }
 
     /**
@@ -1794,7 +1752,6 @@ class WebUser extends RawMinkContext
     public function iClickOnTheJobTrackerButtonOnTheJobWidget()
     {
         $this->getCurrentPage()->find('css', 'a#btn-show-list')->click();
-        $this->wait();
     }
 
     /**
@@ -1803,7 +1760,6 @@ class WebUser extends RawMinkContext
     public function iBlurTheCategoryNode()
     {
         $this->getCurrentPage()->find('css', '#container')->click();
-        $this->wait();
     }
 
     /**
@@ -1887,7 +1843,6 @@ class WebUser extends RawMinkContext
                     $jobExecution->getId()
                 )
             );
-            $this->wait();
             $executionLog = $this->getSession()->evaluateScript("return window.executionLog;");
             $this->getMainContext()->addErrorMessage(sprintf('Job execution: %s', print_r($executionLog, true)));
 
@@ -1942,7 +1897,6 @@ class WebUser extends RawMinkContext
     public function iWaitForTheWidgetsToLoad()
     {
         $this->wait(false);
-        $this->wait();
     }
 
     /**
@@ -1951,7 +1905,6 @@ class WebUser extends RawMinkContext
     public function iWaitForTheOptionsToLoad()
     {
         $this->wait(false);
-        $this->wait();
     }
 
     /**
@@ -1967,7 +1920,6 @@ class WebUser extends RawMinkContext
 
         sleep(10);
         $this->getMainContext()->reload();
-        $this->wait();
     }
 
     /**
@@ -1980,7 +1932,6 @@ class WebUser extends RawMinkContext
         $this->getCurrentPage()->clickLink('Upload and import');
         $this->attachFileToField($this->replacePlaceholders($file), 'Drop a file or click here');
         $this->getCurrentPage()->pressButton('Upload and import now');
-        $this->wait();
     }
 
     /**
@@ -2121,7 +2072,6 @@ class WebUser extends RawMinkContext
      */
     public function iShouldSeeTheCompleteness(TableNode $table)
     {
-        $this->wait();
         $collapseSwitchers = $this->getCurrentPage()->findAll('css', '.completeness-block header .btn');
 
         foreach ($collapseSwitchers as $switcher) {
@@ -2263,8 +2213,6 @@ class WebUser extends RawMinkContext
             ->getPage('Batch Operation')
             ->chooseOperation($operation)
             ->next();
-
-        $this->wait();
     }
 
     /**
@@ -2275,7 +2223,6 @@ class WebUser extends RawMinkContext
     public function iDisplayTheAttributes($fields)
     {
         $this->getCurrentPage()->addAvailableAttributes($this->listToArray($fields));
-        $this->wait();
     }
 
     /**
@@ -2288,7 +2235,6 @@ class WebUser extends RawMinkContext
         $this->getCurrentPage()->next();
         $this->scrollContainerTo(900);
         $this->getCurrentPage()->confirm();
-        $this->wait();
     }
 
     /**
@@ -2625,7 +2571,6 @@ class WebUser extends RawMinkContext
     public function iExecuteJavascript(PyStringNode $string)
     {
         $this->getSession()->executeScript((string) $string);
-        $this->wait();
     }
 
     /**
@@ -2688,7 +2633,6 @@ class WebUser extends RawMinkContext
         $comment    = $this->getCurrentPage()->findComment($message, $authorName);
 
         $this->getCurrentPage()->deleteComment($comment);
-        $this->wait();
     }
 
     /**
@@ -2727,7 +2671,6 @@ class WebUser extends RawMinkContext
     public function iAddANewComment($message)
     {
         $this->getCurrentPage()->createComment($message);
-        $this->wait();
     }
 
     /**
@@ -2744,7 +2687,6 @@ class WebUser extends RawMinkContext
         $comment    = $this->getCurrentPage()->findComment($comment, $authorName);
 
         $this->getCurrentPage()->replyComment($comment, $reply);
-        $this->wait();
     }
 
     /**
@@ -2802,7 +2744,6 @@ class WebUser extends RawMinkContext
     protected function openPage($page, array $options = [])
     {
         $page = $this->getNavigationContext()->openPage($page, $options);
-        $this->wait();
 
         return $page;
     }
