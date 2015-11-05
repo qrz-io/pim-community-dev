@@ -73,13 +73,13 @@ class FiltersConfigurator implements ConfiguratorInterface
         }
 
         $this->sortFilters($displayedFilters);
-        $filters = $configuration->offsetGet('filters');
+        $filters = $configuration->offsetGet(FilterConfiguration::FILTERS_KEY);
 
         foreach ($displayedFilters as $attributeCode => $filterConfig) {
             $filters['columns'][$attributeCode] = $filterConfig;
         }
 
-        $configuration->offsetSet('filters', $filters);
+        $configuration->offsetSet(FilterConfiguration::FILTERS_KEY, $filters);
     }
 
     /**
