@@ -1,0 +1,14 @@
+parameters:
+    pim_localization.validator.constraint.number.class: Pim\Component\Localization\Validator\Constraints\IsNumberValidator
+    pim_localization.validator.constraint.date.class:   Pim\Component\Localization\Validator\Constraints\DateValidator
+
+services:
+    pim_localization.validator.constraint.number:
+        class: %pim_localization.validator.constraint.number.class%
+        tags:
+          - { name: validator.constraint_validator, alias: pim_localization_number }
+
+    pim_localization.validator.constraint.date:
+        class: %pim_localization.validator.constraint.date.class%
+        tags:
+          - { name: validator.constraint_validator, alias: pim_localization_date }

@@ -2,9 +2,9 @@
 
 namespace Pim\Component\Localization\Localizer;
 
-use Pim\Component\Localization\Exception\FormatLocalizerException;
+use Pim\Bundle\LocalizationBundle\Validator\Constraints\Date;
 use Pim\Component\Localization\Provider\Format\FormatProviderInterface;
-use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * Check if date provided respects the format expected and convert it
@@ -21,14 +21,22 @@ class DateLocalizer implements LocalizerInterface
     /** @var FormatProviderInterface */
     protected $formatProvider;
 
+    /** @var ValidatorInterface */
+    protected $validator;
+
     /**
+     * @param ValidatorInterface      $validator
      * @param FormatProviderInterface $formatProvider
      * @param array                   $attributeTypes
      */
-    public function __construct(FormatProviderInterface $formatProvider, array $attributeTypes)
-    {
+    public function __construct(
+        ValidatorInterface $validator,
+        FormatProviderInterface $formatProvider,
+        array $attributeTypes
+    ) {
         $this->formatProvider = $formatProvider;
         $this->attributeTypes = $attributeTypes;
+        $this->validator      = $validator;
     }
 
     /**
@@ -37,16 +45,19 @@ class DateLocalizer implements LocalizerInterface
     public function isValid($date, array $options = [], $attributeCode)
     {
         if (null === $date || '' === $date) {
-            return true;
+            return null;
         }
 
         $options = $this->checkOptions($options);
-        $datetime = $this->getDateTime($date, $options);
-        if (false === $datetime) {
-            throw new FormatLocalizerException($attributeCode, $options['date_format']);
-        }
 
-        return true;
+        $dateValidator = new Date(
+            [
+                'dateFormat' => $options['date_format'],
+                'path'       => $attributeCode
+            ]
+        );
+
+        return $this->validator->validate($date, $dateValidator);
     }
 
     /**
@@ -65,12 +76,7 @@ class DateLocalizer implements LocalizerInterface
         }
 
         if (isset($options['locale'])) {
-            $format = $this->formatProvider->getFormat($options['locale']);
-
-            $datetime = new \DateTime();
-            $datetime = $datetime->createFromFormat(static::DEFAULT_DATE_FORMAT, $date);
-
-            return $datetime->format($format);
+            return $date; // @TODO: not yet implemented (PIM-5146)
         }
     }
 
