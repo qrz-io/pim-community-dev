@@ -2,7 +2,8 @@
 
 namespace Pim\Component\Localization\Localizer;
 
-use Pim\Component\Localization\Exception\FormatLocalizerException;
+use Pim\Bundle\LocalizationBundle\Validator\Constraints\IsNumber;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * @author    Marie Bochu <marie.bochu@akeneo.com>
@@ -14,11 +15,16 @@ abstract class AbstractNumberLocalizer implements LocalizerInterface
     /** @var array */
     protected $attributeTypes;
 
+    /** @var ValidatorInterface */
+    protected $validator;
+
     /**
-     * @param array $attributeTypes
+     * @param ValidatorInterface $validator
+     * @param array              $attributeTypes
      */
-    public function __construct(array $attributeTypes)
+    public function __construct(ValidatorInterface $validator, array $attributeTypes)
     {
+        $this->validator      = $validator;
         $this->attributeTypes = $attributeTypes;
     }
 
@@ -74,19 +80,27 @@ abstract class AbstractNumberLocalizer implements LocalizerInterface
     /**
      * {@inheritdoc}
      */
-    public function isValid($number, array $options = [], $attributeCode)
+    public function validate($number, array $options = [], $attributeCode)
     {
         if (null === $number || ''  === $number) {
-            return true;
+            return null;
+        }
+
+        if (isset($options['locale'])) {
+            $numberFormatter = new \NumberFormatter($options['locale'], \NumberFormatter::DECIMAL);
+            $options['decimal_separator'] = $numberFormatter->getSymbol(\NumberFormatter::DECIMAL_SEPARATOR_SYMBOL);
         }
 
         $options = $this->checkOptions($options);
-        $matchesNumber = $this->getMatchesNumber($number);
-        if (isset($matchesNumber['decimal']) && $matchesNumber['decimal'] !== $options['decimal_separator']) {
-            throw new FormatLocalizerException($attributeCode, $options['decimal_separator']);
-        }
 
-        return true;
+        $numberValidator = new IsNumber(
+            [
+                'decimalSeparator' => $options['decimal_separator'],
+                'path'             => $attributeCode
+            ]
+        );
+
+        return $this->validator->validate($number, $numberValidator);
     }
 
     /**

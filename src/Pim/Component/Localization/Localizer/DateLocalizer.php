@@ -42,7 +42,7 @@ class DateLocalizer implements LocalizerInterface
     /**
      * {@inheritdoc}
      */
-    public function isValid($date, array $options = [], $attributeCode)
+    public function validate($date, array $options = [], $attributeCode)
     {
         if (null === $date || '' === $date) {
             return null;

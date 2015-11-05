@@ -2,6 +2,8 @@
 
 namespace Pim\Component\Localization\Localizer;
 
+use Symfony\Component\Validator\ConstraintViolationListInterface;
+
 /**
  * Convert localized attributes to default format
  *
@@ -20,4 +22,11 @@ interface LocalizedAttributeConverterInterface
      * @return mixed
      */
     public function convert(array $items, array $options = []);
+
+    /**
+     * Get list of violations return by localizers
+     *
+     * @return ConstraintViolationListInterface
+     */
+    public function getViolations();
 }
