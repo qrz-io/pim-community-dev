@@ -43,7 +43,7 @@ class ProductValueNormalizer implements NormalizerInterface
         $result = $this->valuesNormalizer->normalize($entity, $format, $context);
 
         if (AttributeTypes::NUMBER === $entity->getAttribute()->getAttributeType()) {
-            $result['data'] = $this->localizer->convertDefaultToLocalized($result['data'], $context);
+            $result['data'] = $this->localizer->localize($result['data'], $context);
         }
 
         return $result;

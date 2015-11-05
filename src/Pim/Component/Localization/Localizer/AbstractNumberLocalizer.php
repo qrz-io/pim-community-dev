@@ -3,7 +3,6 @@
 namespace Pim\Component\Localization\Localizer;
 
 use Pim\Component\Localization\Exception\FormatLocalizerException;
-use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
 
 /**
  * @author    Marie Bochu <marie.bochu@akeneo.com>
@@ -26,80 +25,43 @@ abstract class AbstractNumberLocalizer implements LocalizerInterface
     /**
      * {@inheritdoc}
      */
-    public function convertDefaultToLocalized($number, array $options = [])
-    {
-        if (null === $number || ''  === $number) {
-            return $number;
-        }
-
-        $options = $this->checkOptions($options);
-        $matchesNumber = $this->getMatchesNumber($number);
-        if (!isset($matchesNumber['decimal'])) {
-            return $number;
-        }
-
-        return str_replace(static::DEFAULT_DECIMAL_SEPARATOR, $options['decimal_separator'], $number);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function convertDefaultToLocalizedFromLocale($number, $locale)
-    {
-        if (null === $number || ''  === $number) {
-            return $number;
-        }
-
-        $numberFormatter = new \NumberFormatter($locale, \NumberFormatter::DECIMAL);
-
-        if (is_numeric($number) && floor($number) != $number) {
-            $numberFormatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, 2);
-            $numberFormatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, 4);
-        }
-
-        return $numberFormatter->format($number);
-    }
-
-    /**
-     * @param mixed  $number
-     * @param array  $options
-     * @param string $attributeCode
-     *
-     * @throws FormatLocalizerException
-     *
-     * @return bool
-     */
-    protected function isValidNumber($number, array $options = [], $attributeCode)
-    {
-        if (null === $number || ''  === $number) {
-            return true;
-        }
-
-        $options = $this->checkOptions($options);
-
-        $matchesNumber = $this->getMatchesNumber($number);
-        if (isset($matchesNumber['decimal']) && $matchesNumber['decimal'] !== $options['decimal_separator']) {
-            throw new FormatLocalizerException($attributeCode, $options['decimal_separator']);
-        }
-
-        return true;
-    }
-
-    /**
-     * Convert a number to the default format
-     *
-     * @param mixed $number
-     * @param array $options
-     *
-     * @return mixed
-     */
-    protected function convertNumberToDefault($number, array $options = [])
+    public function localize($number, array $options = [])
     {
         if (null === $number || '' === $number) {
             return $number;
         }
 
-        $options = $this->checkOptions($options);
+        if (isset($options['decimal_separator'])) {
+            $matchesNumber = $this->getMatchesNumber($number);
+            if (!isset($matchesNumber['decimal'])) {
+                return $number;
+            }
+
+            return str_replace(static::DEFAULT_DECIMAL_SEPARATOR, $options['decimal_separator'], $number);
+        }
+
+        if (isset($options['locale'])) {
+            $numberFormatter = new \NumberFormatter($options['locale'], \NumberFormatter::DECIMAL);
+
+            if (floor($number) != $number) {
+                $numberFormatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, 2);
+                $numberFormatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, 4);
+            }
+
+            return $numberFormatter->format($number);
+        }
+
+        return $number;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function delocalize($number, array $options = [])
+    {
+        if (null === $number || '' === $number) {
+            return $number;
+        }
 
         $matchesNumber = $this->getMatchesNumber($number);
         if (!isset($matchesNumber['decimal'])) {
@@ -107,6 +69,24 @@ abstract class AbstractNumberLocalizer implements LocalizerInterface
         }
 
         return str_replace($matchesNumber['decimal'], static::DEFAULT_DECIMAL_SEPARATOR, $number);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isValid($number, array $options = [], $attributeCode)
+    {
+        if (null === $number || ''  === $number) {
+            return true;
+        }
+
+        $options = $this->checkOptions($options);
+        $matchesNumber = $this->getMatchesNumber($number);
+        if (isset($matchesNumber['decimal']) && $matchesNumber['decimal'] !== $options['decimal_separator']) {
+            throw new FormatLocalizerException($attributeCode, $options['decimal_separator']);
+        }
+
+        return true;
     }
 
     /**
@@ -137,7 +117,6 @@ abstract class AbstractNumberLocalizer implements LocalizerInterface
     protected function checkOptions(array $options)
     {
         if (!isset($options['decimal_separator']) || '' === $options['decimal_separator']) {
-            //throw new MissingOptionsException('The option "decimal_separator" do not exist.');
             $options['decimal_separator'] = static::DEFAULT_DECIMAL_SEPARATOR;
         }
 

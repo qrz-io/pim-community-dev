@@ -34,13 +34,13 @@ class PriceNormalizerSpec extends ObjectBehavior
         $price->getCurrency()->willReturn('EUR');
 
         $priceNormalizer->normalize($price, null, $options)->willReturn(['price-EUR' => '25.30']);
-        $localizer->convertDefaultToLocalized('25.30', $options)->willReturn('25,30');
+        $localizer->localize('25.30', $options)->willReturn('25,30');
 
         $this->normalize($price, null, $options)->shouldReturn(['price-EUR' => '25,30']);
 
         $options = ['decimal_separator' => '.'];
         $priceNormalizer->normalize($price, null, $options)->willReturn(['price-EUR' => '25.30']);
-        $localizer->convertDefaultToLocalized('25.30', $options)->willReturn('25.30');
+        $localizer->localize('25.30', $options)->willReturn('25.30');
         $this->normalize($price, null, $options)->shouldReturn(['price-EUR' => '25.30']);
     }
 
@@ -51,7 +51,7 @@ class PriceNormalizerSpec extends ObjectBehavior
         $price->getCurrency()->willReturn('EUR');
 
         $priceNormalizer->normalize($price, null, $options)->willReturn(['price-EUR' => '25']);
-        $localizer->convertDefaultToLocalized('25', $options)->willReturn('25');
+        $localizer->localize('25', $options)->willReturn('25');
 
         $this->normalize($price, null, $options)->shouldReturn(['price-EUR' => '25']);
     }
@@ -63,7 +63,7 @@ class PriceNormalizerSpec extends ObjectBehavior
         $price->getCurrency()->willReturn('EUR');
 
         $priceNormalizer->normalize($price, null, $options)->willReturn(['price-EUR' => '25']);
-        $localizer->convertDefaultToLocalized('25', $options)->willReturn('25');
+        $localizer->localize('25', $options)->willReturn('25');
 
         $this->normalize($price, null, $options)->shouldReturn(['price-EUR' => '25']);
     }
@@ -75,7 +75,7 @@ class PriceNormalizerSpec extends ObjectBehavior
         $price->getCurrency()->willReturn('EUR');
 
         $priceNormalizer->normalize($price, null, $options)->willReturn(['price-EUR' => '']);
-        $localizer->convertDefaultToLocalized('', $options)->willReturn('');
+        $localizer->localize('', $options)->willReturn('');
 
         $this->normalize($price, null, $options)->shouldReturn(['price-EUR' => '']);
     }
@@ -87,7 +87,7 @@ class PriceNormalizerSpec extends ObjectBehavior
         $price->getCurrency()->willReturn('EUR');
 
         $priceNormalizer->normalize($price, null, $options)->willReturn(['price-EUR' => '']);
-        $localizer->convertDefaultToLocalized('', $options)->willReturn('');
+        $localizer->localize('', $options)->willReturn('');
 
         $this->normalize($price, null, $options)->shouldReturn(['price-EUR' => '']);
     }
