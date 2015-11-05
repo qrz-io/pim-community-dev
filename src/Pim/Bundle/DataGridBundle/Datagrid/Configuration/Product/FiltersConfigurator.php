@@ -33,9 +33,7 @@ class FiltersConfigurator implements ConfiguratorInterface
      */
     public function configure(DatagridConfiguration $configuration)
     {
-//        $path       = sprintf(self::SOURCE_PATH, self::USEABLE_ATTRIBUTES_KEY);
-//        $attributes = $configuration->offsetGetByPath($path);
-        $attributes = $configuration->offsetGet('source')[self::USEABLE_ATTRIBUTES_KEY];
+        $attributes = $configuration->offsetGet(self::SOURCE_KEY)[self::USEABLE_ATTRIBUTES_KEY];
         $attributes = ($attributes === null) ? [] : $attributes;
 
         $displayedFilters = [];
@@ -75,21 +73,12 @@ class FiltersConfigurator implements ConfiguratorInterface
         }
 
         $this->sortFilters($displayedFilters);
-
         $filters = $configuration->offsetGet('filters');
 
         foreach ($displayedFilters as $attributeCode => $filterConfig) {
             $filters['columns'][$attributeCode] = $filterConfig;
-//            $configuration->offsetAddToArray('filters', [
-//                'columns' => [
-//                    $attributeCode => $filterConfig
-//                ]
-//            ]);
-//            $configuration->offsetSetByPath(
-//                sprintf('%s[%s]', FilterConfiguration::COLUMNS_PATH, $attributeCode),
-//                $filterConfig
-//            );
         }
+
         $configuration->offsetSet('filters', $filters);
     }
 
