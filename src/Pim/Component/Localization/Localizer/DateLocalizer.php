@@ -69,15 +69,13 @@ class DateLocalizer implements LocalizerInterface
             return $date;
         }
 
-        if (isset($options['date_format'])) {
-            $datetime = $this->getDateTime($date, $options);
-
-            return $datetime->format(static::DEFAULT_DATE_FORMAT);
-        }
-
         if (isset($options['locale'])) {
             return $date; // @TODO: not yet implemented (PIM-5146)
         }
+
+        $options = $this->checkOptions($options);
+        $datetime = $this->getDateTime($date, $options);
+        return (false !== $datetime) ? $datetime->format(static::DEFAULT_DATE_FORMAT) : $date;
     }
 
     /**
@@ -89,13 +87,6 @@ class DateLocalizer implements LocalizerInterface
             return $date;
         }
 
-        if (isset($options['date_format'])) {
-            $datetime = new \DateTime();
-            $datetime = $datetime->createFromFormat(static::DEFAULT_DATE_FORMAT, $date);
-
-            return $datetime->format($options['date_format']);
-        }
-
         if (isset($options['locale'])) {
             $format = $this->formatProvider->getFormat($options['locale']);
 
@@ -104,6 +95,12 @@ class DateLocalizer implements LocalizerInterface
 
             return $datetime->format($format);
         }
+
+        $options = $this->checkOptions($options);
+        $datetime = new \DateTime();
+        $datetime = $datetime->createFromFormat(static::DEFAULT_DATE_FORMAT, $date);
+
+        return $datetime->format($options['date_format']);
     }
 
     /**
@@ -142,5 +139,4 @@ class DateLocalizer implements LocalizerInterface
 
         return $options;
     }
-
 }

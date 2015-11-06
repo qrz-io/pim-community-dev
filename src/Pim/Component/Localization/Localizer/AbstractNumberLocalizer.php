@@ -3,6 +3,7 @@
 namespace Pim\Component\Localization\Localizer;
 
 use Pim\Bundle\LocalizationBundle\Validator\Constraints\IsNumber;
+use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
@@ -37,15 +38,6 @@ abstract class AbstractNumberLocalizer implements LocalizerInterface
             return $number;
         }
 
-        if (isset($options['decimal_separator'])) {
-            $matchesNumber = $this->getMatchesNumber($number);
-            if (!isset($matchesNumber['decimal'])) {
-                return $number;
-            }
-
-            return str_replace(static::DEFAULT_DECIMAL_SEPARATOR, $options['decimal_separator'], $number);
-        }
-
         if (isset($options['locale'])) {
             $numberFormatter = new \NumberFormatter($options['locale'], \NumberFormatter::DECIMAL);
 
@@ -57,7 +49,13 @@ abstract class AbstractNumberLocalizer implements LocalizerInterface
             return $numberFormatter->format($number);
         }
 
-        return $number;
+        $options = $this->checkOptions($options);
+        $matchesNumber = $this->getMatchesNumber($number);
+        if (!isset($matchesNumber['decimal'])) {
+            return $number;
+        }
+
+        return str_replace(static::DEFAULT_DECIMAL_SEPARATOR, $options['decimal_separator'], $number);
     }
 
     /**
@@ -131,7 +129,7 @@ abstract class AbstractNumberLocalizer implements LocalizerInterface
     protected function checkOptions(array $options)
     {
         if (!isset($options['decimal_separator']) || '' === $options['decimal_separator']) {
-            $options['decimal_separator'] = static::DEFAULT_DECIMAL_SEPARATOR;
+            throw new MissingOptionsException('The option "decimal_separator" do not exist.');
         }
 
         return $options;
