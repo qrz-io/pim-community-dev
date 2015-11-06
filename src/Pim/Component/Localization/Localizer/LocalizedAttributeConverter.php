@@ -63,6 +63,31 @@ class LocalizedAttributeConverter implements LocalizedAttributeConverterInterfac
     /**
      * {@inheritdoc}
      */
+    public function convertForm(array $items, array $options = [])
+    {
+        $this->violations = new ConstraintViolationList();
+        $attributeTypes = $this->attributeRepository->getAttributeTypeByCodes(array_keys($items));
+
+        foreach ($items as $code => $item) {
+            $path = sprintf('children[productTemplate].children[values].children[price].children[prices].data[EUR].data', $code);
+            if (isset($attributeTypes[$code])) {
+                $localizer = $this->localizerRegistry->getLocalizer($attributeTypes[$code]);
+
+                if (null !== $localizer) {
+                    unset($item['id']);
+                    foreach ($item as $index => $data) {
+                        $items[$code][$index] = $this->convertAttribute($localizer, ['data' => $data], $options, $path)['data'];
+                    }
+                }
+            }
+        }
+
+        return $items;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getViolations()
     {
         return $this->violations;

@@ -4,7 +4,10 @@ namespace Pim\Bundle\EnrichBundle\Form\Handler;
 
 use Akeneo\Component\StorageUtils\Saver\SaverInterface;
 use Pim\Bundle\CatalogBundle\Model\GroupInterface;
+use Pim\Bundle\CatalogBundle\Model\ProductTemplateInterface;
 use Pim\Bundle\CatalogBundle\Repository\ProductRepositoryInterface;
+use Pim\Component\Localization\Localizer\LocalizedAttributeConverterInterface;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -29,24 +32,43 @@ class GroupHandler implements HandlerInterface
     /** @var ProductRepositoryInterface */
     protected $productRepository;
 
+    /** @var LocalizedAttributeConverterInterface */
+    protected $localizedConverter;
+
     /**
      * Constructor for handler
      *
-     * @param FormInterface              $form
-     * @param Request                    $request
-     * @param SaverInterface             $groupSaver
-     * @param ProductRepositoryInterface $productRepository
+     * @param FormInterface                        $form
+     * @param Request                              $request
+     * @param SaverInterface                       $groupSaver
+     * @param ProductRepositoryInterface           $productRepository
+     * @param LocalizedAttributeConverterInterface $localizedConverter
      */
     public function __construct(
         FormInterface $form,
         Request $request,
         SaverInterface $groupSaver,
-        ProductRepositoryInterface $productRepository
+        ProductRepositoryInterface $productRepository,
+        LocalizedAttributeConverterInterface $localizedConverter = null
     ) {
-        $this->form       = $form;
-        $this->request    = $request;
-        $this->groupSaver = $groupSaver;
-        $this->productRepository = $productRepository;
+        $this->form               = $form;
+        $this->request            = $request;
+        $this->groupSaver         = $groupSaver;
+        $this->productRepository  = $productRepository;
+        $this->localizedConverter = $localizedConverter;
+    }
+
+    /**
+     * @param array $form
+     *
+     * @return array
+     */
+    protected function convertLocalizedValues(array $form)
+    {
+        $form['productTemplate']['values'] = $this->localizedConverter
+            ->convertForm($form['productTemplate']['values'], ['locale' => 'fr']);
+
+        return $form;
     }
 
     /**
@@ -63,9 +85,25 @@ class GroupHandler implements HandlerInterface
                 $group->setProducts($products);
             }
 
-            $this->form->submit($this->request);
+            if ($group->getType()->isVariant()) {
+                if (null !== $this->request->request) {
+                    $oldForm = $this->request->request->get('pim_enrich_variant_group_form');
+                    $form = $this->convertLocalizedValues($oldForm);
+                    $this->request->request->set('pim_enrich_variant_group_form', $form);
+                    $violations = $this->localizedConverter->getViolations();
+                }
+            }
 
-            if ($this->form->isValid()) {
+            $this->form->submit($this->request);
+/*
+            $productTemplate = $this->form->get('productTemplate');
+            foreach ($violations as $violation) {
+                $productTemplate->addError(new FormError('es', 'template', [], null, $violation));
+            }
+
+            $this->form->offsetSet('productTemplate', $productTemplate);
+*/
+            if ($this->form->isValid() && ((isset($violations) && 0 === $violations->count()) || !isset($violations))) {
                 $this->onSuccess($group);
 
                 return true;
