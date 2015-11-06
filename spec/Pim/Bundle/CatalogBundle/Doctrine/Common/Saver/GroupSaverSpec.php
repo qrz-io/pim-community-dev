@@ -199,7 +199,7 @@ class GroupSaverSpec extends ObjectBehavior
         $products->toArray()->willReturn([$product]);
 
         $userLocaleResolver->getOptions()->willReturn(['decimal_separator' => ',']);
-        $localizedConverter->convert(['number' => '12,60'], ['decimal_separator' => ',', 'date_format' => 'Y-m-d'])
+        $localizedConverter->convert(['number' => '12,60'], ['decimal_separator' => ','])
             ->willReturn(['number' => '12.60']);
         $template->setValuesData(['number' => '12.60'])->shouldBeCalled();
 

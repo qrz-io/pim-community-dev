@@ -11,7 +11,6 @@ use Pim\Bundle\CatalogBundle\Builder\ProductBuilderInterface;
 use Pim\Bundle\CatalogBundle\Model\ProductInterface;
 use Pim\Component\Catalog\Comparator\Filter\ProductFilterInterface;
 use Pim\Component\Connector\ArrayConverter\StandardArrayConverterInterface;
-use Pim\Component\Localization\Exception\FormatLocalizerException;
 use Pim\Component\Localization\Localizer\LocalizedAttributeConverterInterface;
 use Pim\Component\Localization\Localizer\ConverterInterface;
 use Prophecy\Argument;
@@ -150,6 +149,7 @@ class ProductProcessorSpec extends ObjectBehavior
             ->update($product, $filteredData)
             ->shouldBeCalled();
 
+        $localizedConverter->getViolations()->willReturn($violationList);
         $productValidator
             ->validate($product)
             ->willReturn($violationList);
@@ -253,6 +253,7 @@ class ProductProcessorSpec extends ObjectBehavior
             ->update($product, $filteredData)
             ->shouldBeCalled();
 
+        $localizedConverter->getViolations()->willReturn($violationList);
         $productValidator
             ->validate($product)
             ->willReturn($violationList);
@@ -355,6 +356,7 @@ class ProductProcessorSpec extends ObjectBehavior
             ->update($product, $filteredData)
             ->shouldBeCalled();
 
+        $localizedConverter->getViolations()->willReturn($violationList);
         $productValidator
             ->validate($product)
             ->willReturn($violationList);
@@ -460,6 +462,7 @@ class ProductProcessorSpec extends ObjectBehavior
             ->update($product, $filteredData)
             ->shouldBeCalled();
 
+        $localizedConverter->getViolations()->willReturn($violationList);
         $productValidator
             ->validate($product)
             ->willReturn($violationList);
@@ -623,7 +626,8 @@ class ProductProcessorSpec extends ObjectBehavior
         $productDetacher,
         $productFilter,
         $localizedConverter,
-        ProductInterface $product
+        ProductInterface $product,
+        ConstraintViolationListInterface $violationList
     ) {
         $productRepository->getIdentifierProperties()->willReturn(['sku']);
         $productRepository->findOneByIdentifier('tshirt')->willReturn(false);
@@ -709,6 +713,7 @@ class ProductProcessorSpec extends ObjectBehavior
             ->update($product, $filteredData)
             ->shouldBeCalled();
 
+        $localizedConverter->getViolations()->willReturn($violationList);
         $violation = new ConstraintViolation('There is a small problem with option code', 'foo', [], 'bar', 'code', 'mycode');
         $violations = new ConstraintViolationList([$violation]);
         $productValidator
@@ -904,6 +909,7 @@ class ProductProcessorSpec extends ObjectBehavior
             ->update($product, $filteredData)
             ->shouldBeCalled();
 
+        $localizedConverter->getViolations()->willReturn($violationList);
         $productValidator
             ->validate($product)
             ->willReturn($violationList);
@@ -917,6 +923,7 @@ class ProductProcessorSpec extends ObjectBehavior
         $arrayConverter,
         $localizedConverter,
         $productRepository,
+        $productValidator,
         ProductInterface $product
     ) {
         $productRepository->getIdentifierProperties()->willReturn(['sku']);
@@ -952,10 +959,18 @@ class ProductProcessorSpec extends ObjectBehavior
             ->convert($originalData, $converterOptions)
             ->willReturn($convertedData);
 
+        $convertedData['number'][0]['data'] = '10.45';
         $localizedConverter->convert($convertedData, [
             'decimal_separator' => '.',
             'date_format'       => 'Y-m-d'
-        ])->willThrow(new FormatLocalizerException('number', '.'));
+        ])->willReturn($convertedData);
+
+        $violation = new ConstraintViolation('This type of value expects the use of . to separate decimals.', 'foo', [], 'bar', 'code', 'mycode');
+        $violations = new ConstraintViolationList([$violation]);
+        $localizedConverter->getViolations()->willReturn($violations);
+        $productValidator
+            ->validate($product)
+            ->willReturn($violations);
 
         $this
             ->shouldThrow('Akeneo\Bundle\BatchBundle\Item\InvalidItemException')

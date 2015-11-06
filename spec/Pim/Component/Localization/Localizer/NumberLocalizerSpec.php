@@ -3,17 +3,18 @@
 namespace spec\Pim\Component\Localization\Localizer;
 
 use PhpSpec\ObjectBehavior;
+use Pim\Bundle\LocalizationBundle\Validator\Constraints\IsNumber;
 use Pim\Component\Localization\Exception\FormatLocalizerException;
 use Prophecy\Argument;
 use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class NumberLocalizerSpec extends ObjectBehavior
 {
-    function let()
+    function let(ValidatorInterface $validator)
     {
-        $this->beConstructedWith(
-            ['pim_catalog_number']
-        );
+        $this->beConstructedWith($validator, ['pim_catalog_number']);
     }
 
     function it_is_a_localizer()
@@ -30,24 +31,26 @@ class NumberLocalizerSpec extends ObjectBehavior
 
     function it_valids_the_format()
     {
-        $this->isValid('10.05', ['decimal_separator' => '.'], 'number')->shouldReturn(true);
-        $this->isValid('-10.05', ['decimal_separator' => '.'], 'number')->shouldReturn(true);
-        $this->isValid('10', ['decimal_separator' => '.'], 'number')->shouldReturn(true);
-        $this->isValid('-10', ['decimal_separator' => '.'], 'number')->shouldReturn(true);
-        $this->isValid(10, ['decimal_separator' => '.'], 'number')->shouldReturn(true);
-        $this->isValid(10.0585, ['decimal_separator' => '.'], 'number')->shouldReturn(true);
-        $this->isValid(' 10.05 ', ['decimal_separator' => '.'], 'number')->shouldReturn(true);
-        $this->isValid(null, ['decimal_separator' => '.'], 'number')->shouldReturn(true);
-        $this->isValid('', ['decimal_separator' => '.'], 'number')->shouldReturn(true);
-        $this->isValid('0', ['decimal_separator' => '.'], 'number')->shouldReturn(true);
-        $this->isValid(0, ['decimal_separator' => '.'], 'number')->shouldReturn(true);
+        $this->validate('10.05', ['decimal_separator' => '.'], 'number')->shouldReturn(null);
+        $this->validate('-10.05', ['decimal_separator' => '.'], 'number')->shouldReturn(null);
+        $this->validate('10', ['decimal_separator' => '.'], 'number')->shouldReturn(null);
+        $this->validate('-10', ['decimal_separator' => '.'], 'number')->shouldReturn(null);
+        $this->validate(10, ['decimal_separator' => '.'], 'number')->shouldReturn(null);
+        $this->validate(10.0585, ['decimal_separator' => '.'], 'number')->shouldReturn(null);
+        $this->validate(' 10.05 ', ['decimal_separator' => '.'], 'number')->shouldReturn(null);
+        $this->validate(null, ['decimal_separator' => '.'], 'number')->shouldReturn(null);
+        $this->validate('', ['decimal_separator' => '.'], 'number')->shouldReturn(null);
+        $this->validate('0', ['decimal_separator' => '.'], 'number')->shouldReturn(null);
+        $this->validate(0, ['decimal_separator' => '.'], 'number')->shouldReturn(null);
     }
 
-    function it_throws_an_exception_if_the_decimal_separator_is_not_valid()
-    {
-        $exception = new FormatLocalizerException('number', ',');
-        $this->shouldThrow($exception)
-            ->during('isValid', ['10.00', ['decimal_separator' => ','], 'number']);
+    function it_returns_a_constraint_if_the_format_is_not_valid(
+        $validator,
+        ConstraintViolationListInterface $constraints
+    ) {
+        $number = new IsNumber(['decimalSeparator' => '.', 'path' => 'number']);
+        $validator->validate('1,5', $number)->willReturn($constraints);
+        $this->validate('1,5', ['decimal_separator' => '.'], 'number')->shouldReturn($constraints);
     }
 
     function it_convert_comma_to_dot_separator()
@@ -69,12 +72,12 @@ class NumberLocalizerSpec extends ObjectBehavior
     {
         $exception = new MissingOptionsException('The option "decimal_separator" do not exist.');
         $this->shouldThrow($exception)
-            ->during('isValid', ['10.00', [], 'number']);
+            ->during('validate', ['10.00', [], 'number']);
 
         $this->shouldThrow($exception)
-            ->during('isValid', ['10.00', ['decimal_separator' => null], 'number']);
+            ->during('validate', ['10.00', ['decimal_separator' => null], 'number']);
 
         $this->shouldThrow($exception)
-            ->during('isValid', ['10.00', ['decimal_separator' => ''], 'number']);
+            ->during('validate', ['10.00', ['decimal_separator' => ''], 'number']);
     }
 }

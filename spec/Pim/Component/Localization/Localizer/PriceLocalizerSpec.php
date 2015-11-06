@@ -42,7 +42,7 @@ class PriceLocalizerSpec extends ObjectBehavior
             ['data' => 0, 'currency' => 'PES'],
             ['data' => '0', 'currency' => 'PES'],
         ];
-        $this->isValid($prices, ['decimal_separator' => '.'], 'prices')->shouldReturn(true);
+        $this->validate($prices, ['decimal_separator' => '.'], 'prices')->shouldReturn(true);
     }
 
     function it_throws_an_exception_if_the_decimal_separator_is_not_valid()
@@ -50,7 +50,7 @@ class PriceLocalizerSpec extends ObjectBehavior
         $prices = [['data' => '10.00', 'currency' => 'EUR'], ['data' => '10,05', 'currency' => 'USD']];
         $exception = new FormatLocalizerException('prices', ',');
         $this->shouldThrow($exception)
-            ->during('isValid', [$prices, ['decimal_separator' => ','], 'prices']);
+            ->during('validate', [$prices, ['decimal_separator' => ','], 'prices']);
     }
 
     function it_converts()
@@ -90,12 +90,12 @@ class PriceLocalizerSpec extends ObjectBehavior
     {
         $exception = new MissingOptionsException('The option "decimal_separator" do not exist.');
         $this->shouldThrow($exception)
-            ->during('isValid', [[['data' => '10.00']], [], 'prices']);
+            ->during('validate', [[['data' => '10.00']], [], 'prices']);
 
         $this->shouldThrow($exception)
-            ->during('isValid', [[['data' => '10.00']], ['decimal_separator' => null], 'prices']);
+            ->during('validate', [[['data' => '10.00']], ['decimal_separator' => null], 'prices']);
 
         $this->shouldThrow($exception)
-            ->during('isValid', [[['data' => '10.00']], ['decimal_separator' => ''], 'prices']);
+            ->during('validate', [[['data' => '10.00']], ['decimal_separator' => ''], 'prices']);
     }
 }
