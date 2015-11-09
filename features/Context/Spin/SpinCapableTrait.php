@@ -25,21 +25,31 @@ trait SpinCapableTrait
         $timeout = FeatureContext::getTimeout();
         $end     = $start + ($timeout / 1000.0);
 
-        $logThreshold = (int) $timeout * 0.8;
+        $logThreshold      = (int) $timeout * 0.8;
+        $previousException = null;
+        $result            = null;
 
         do {
-            $result = $callable($this);
-            sleep(1);
-        } while (microtime(true) < $end && !$result);
+            try {
+                $result = $callable($this);
+                sleep(1);
+            } catch (\Exception $e) {
+                $previousException = $e;
+            }
+        } while (
+            microtime(true) < $end &&
+            !$result &&
+            !$previousException instanceof TimeoutException
+        );
 
         if (!$result) {
             $infos = sprintf('Spin : timeout of %d excedeed, with message : %s', $timeout, $message);
-            throw new TimeoutException($infos);
+            throw new TimeoutException($infos, 0, $previousException);
         }
 
         $elapsed = microtime(true) - $start;
         if ($elapsed >= $logThreshold) {
-            // log long spin
+            printf('Long spin detected. Message = %s', $message);
         }
 
         return $result;
