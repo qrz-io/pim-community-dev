@@ -326,6 +326,26 @@ class WebUser extends RawMinkContext
     }
 
     /**
+     * @param string $group
+     *
+     * @Given /^I click on the "([^"]*)" ACL group$/
+     */
+    public function iClickOnTheACLGroup($group)
+    {
+        $this->getCurrentPage()->selectGroup($group);
+    }
+
+    /**
+     * @param string $group
+     *
+     * @Given /^I click on the "([^"]*)" ACL role/
+     */
+    public function iClickOnTheACLRole($group)
+    {
+        $this->getCurrentPage()->selectRole($group);
+    }
+
+    /**
      * @param string $association
      *
      * @Given /^I select the "([^"]*)" association$/
@@ -2408,6 +2428,7 @@ class WebUser extends RawMinkContext
         unset($expectedLines[0]);
 
         foreach ($expectedLines as $expectedLine) {
+            $originalExpectedLine = $expectedLine;
             $found = false;
             foreach ($actualLines as $index => $actualLine) {
                 // Order of columns is not ensured
@@ -2433,7 +2454,7 @@ class WebUser extends RawMinkContext
                 throw new \Exception(
                     sprintf(
                         'Could not find a line containing "%s" in %s',
-                        implode(' | ', $expectedLine),
+                        implode(' | ', $originalExpectedLine),
                         $path
                     )
                 );

@@ -1,14 +1,68 @@
 # 1.4.x
 
+## BC Breaks
+- Changed constructor of `Pim\Bundle\TransformBundle\Normalizer\MongoDB\ProductValueNormalizer`to add a `Doctrine\Common\Persistence\ManagerRegistry` (instead of a DocumentManager to avoid circular references)
+  It is required because normalization of reference data in product values is based on Doctrine metadata.
+
+## Bug fixes
+- PIM-5238: fix scroll on multiselect for mass edit
+- PIM-5177: fix login redirection
+
+## Performance improvements
+- PIM-5218: Use DirectToMongoDB bulk product saver natively. This considerably speeds up all bulk actions on a MongoDB storage install (imports, mass edit, rules application, etc.).
+
+# 1.4.12 (2015-12-03)
+
+## Bug fixes
+- PIM-5235: Fix empty reference data name on attributes import
+- PIM-5208: Fix the datagrid performance issue related to large number of attributes, only attribute usable in grid will be available
+- PIM-5215: Create empty product values for new family attributes after product import with family change
+- PIM-5268: Fix PDF display to be able to display long attribute name
+- PIM-5194: Fix performance issues on families loading in PEF
+
+# 1.4.11 (2015-11-27)
+
+## BC Breaks
+- Changed constructor of `Pim\Bundle\VersioningBundle\EventSubscriber\AddVersionSubscriber` in order to avoid circular reference dependency exceptions.
+
+## Performance improvements
+- PIM-5209: Optimize AttributeGroupNormalizer in order to serialize attributes codes in one request.
+
+## Bug fixes
+- PIM-5176: Fix customisation of columns not saved in "Column Selection"
+- PIM-5201: Fix permission System/Edit a Role
+- PIM-5172: Fix PDF export for text area attribute
+- PIM-5171: Apply ACLs on mass edit actions
+- PIM-5240: Fix Mongo normalization that creates a nullable family field
+- PIM-5159: Attribute values appearing/disappearing when you change attribute groups
+- PIM-5241: Fix search input field with strange display on Firefox / Mass Edit on common attributes
+
+# 1.4.10 (2015-11-20)
+
+## Bug fixes
+- PIM-5163: Fix the VersionRepository on MongoDB to take the most recent entry for product resources
+- PIM-5169: Fix mass edit attribute selection while using a small screen resolution
+
+# 1.4.9 (2015-11-12)
+
+## Bug fixes
+- PIM-5127: Improve products export memory usage
+- PIM-5148: IE11 wrong display on multiple select attributes
+- PIM-5161: Fix the is_associated sort on MongoDB association grid
+- PIM-5150: Improve the product grid loading performance when a lot of attribute filters are available
+
+# 1.4.8 (2015-11-09)
+
 ## Bug fixes
 - PIM-5036: Fix metric select2 bug in PEF
 - PIM-5119: Fix the "Manage filters", which was very slow when there was a lot of attributes to display
 - PIM-5121: Fix the channel code displayed instead of label
 - PIM-5139: Fix association grid performance and sorting issues
- 
+
 # 1.4.7 (2015-11-03)
 
 ## Bug fixes
+- PIM-5079: Add batch jobs script for 1.3 to 1.4 migration
 - PIM-5078: Fix category move action
 - PIM-4925: Fix dashboard patch available information
 - PIM-5082: Fix variant group modal display in product edit form (in mongo storage)
@@ -20,7 +74,8 @@
 # 1.4.6 (2015-10-27)
 
 ## Bug fixes
-- PIM-5051: Fix mass delete products error on versionning 
+- PIM-5051: Fix mass delete products error on versionning
+- PIM-5055: Fix medias migration for removed medias in product values
 
 # 1.4.5 (2015-10-23)
 
@@ -33,6 +88,7 @@
 
 ## Bug fixes
 - PIM-5016: Fix import product with only sku and family columns
+- PIM-5017: Fix media migration with lots of files
 - PIM-5000: Fix the products on which mass actions are applied
 - PIM-5006: Fix the API key generation
 
@@ -59,6 +115,7 @@
 - PIM-4458: Fix name display in pinbar for product edit pages
 
 ## BC breaks
+- Change the constructor of `Pim\Bundle\EnrichBundle\Controller\MassEditActionController`, added `$gridNameRouteMapping` as the last argument.
 - Change the constructor of `Pim\Bundle\EnrichBundle\Controller`, added `$gridNameRouteMapping` as the last argument.
 
 # 1.4.1 (2015-09-24)
