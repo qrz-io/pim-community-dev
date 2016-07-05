@@ -123,6 +123,7 @@ class DoctrineJobRepository implements JobRepositoryInterface
      */
     public function updateJobExecution(JobExecution $jobExecution)
     {
+        $this->checkConnection();
         $this->jobManager->persist($jobExecution);
         $this->jobManager->flush($jobExecution);
     }
@@ -132,6 +133,7 @@ class DoctrineJobRepository implements JobRepositoryInterface
      */
     public function updateStepExecution(StepExecution $stepExecution)
     {
+        $this->checkConnection();
         $this->jobManager->persist($stepExecution);
         $this->jobManager->flush($stepExecution);
     }
@@ -141,6 +143,7 @@ class DoctrineJobRepository implements JobRepositoryInterface
      */
     public function getLastJobExecution(JobInstance $jobInstance, $status)
     {
+        $this->checkConnection();
         return $this->jobManager->createQueryBuilder()
             ->select('j')
             ->from($this->jobExecutionClass, 'j')
@@ -159,6 +162,7 @@ class DoctrineJobRepository implements JobRepositoryInterface
      */
     public function findPurgeables($days)
     {
+        $this->checkConnection();
         $qb = $this->jobManager->createQueryBuilder()
             ->select('je')
             ->from($this->jobExecutionClass, 'je');
@@ -188,9 +192,44 @@ class DoctrineJobRepository implements JobRepositoryInterface
      */
     public function remove(array $jobsExecutions)
     {
+        $this->checkConnection();
         foreach ($jobsExecutions as $jobsExecution) {
             $this->jobManager->remove($jobsExecution);
         }
         $this->jobManager->flush();
+    }
+
+    /**
+     * Ping the Server, if not available then reset the connection.
+     * @author Cristian Quiroz <cq@amp.co>
+     */
+    public function checkConnection()
+    {
+        echo '##11'.PHP_EOL;
+        $connection = $this->jobManager->getConnection();
+        if ($this->pingConnection($connection) === false) {
+            echo '##22'.PHP_EOL;
+            $connection->close();
+            $connection->connect();
+        }
+    }
+
+    /**
+     * Pings the server, returns false if it's not available.
+     * There is a ping() method in Doctrine\DBAL\Connection in the doctrine/dbal package
+     * as of 2.5.0, but  we are currently on 2.4.x
+     * @return bool
+     * @author Cristian Quiroz <cq@amp.co>
+     */
+    private function pingConnection()
+    {
+        $connection = $this->jobManager->getConnection();
+        $connection->connect();
+        try {
+            $connection->query($connection->getDatabasePlatform()->getDummySelectSQL());
+            return true;
+        } catch (DBALException $e) {
+            return false;
+        }
     }
 }
